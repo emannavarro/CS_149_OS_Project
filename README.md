@@ -5,4 +5,6 @@
 
 ## Project: Process Management Simulation ##
 
-Goal: To simulate five process management functions: process creation, replacing the current process image with a new process image, process state transition, process scheduling, and context switching.
+Goal: To simulate five process management functions: process creation, replacing the 
+current process image with a new process image, process state transition, process scheduling, 
+and context switching.
