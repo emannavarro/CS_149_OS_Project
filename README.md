@@ -1,6 +1,6 @@
 # CS_149_OS_Project: Process Management Simulation
 
-### Aaron Oi, Ali Zargari, Emanuel Navarro, Ven ###
+### Aaron Oi, Ali Zargari, Emanuel Navarro, Sachin Kaul ###
 
 ## Project Description ##
 
