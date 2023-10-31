@@ -1,9 +1,8 @@
-# CS_149_OS_Project
-
+# CS_149_OS_Project: Process Management Simulation
 
 ### Aaron Oi, Ali Zargari, Emanuel Navarro, Ven ###
 
-## Project: Process Management Simulation ##
+## Project Description ##
 
 Goal: To simulate five process management functions: process creation, replacing the 
 current process image with a new process image, process state transition, process scheduling, 
