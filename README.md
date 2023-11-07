@@ -54,6 +54,8 @@ The process manager process simulates five process management functions: creatio
 The process manager creates the first simulated process (process id = 0). Program for this process is read from a file (filename: init). This is the only simulated process created by the process manager on its own. All other simulated processes are created in response to the execution of the F instruction.
 
 ## Process manager: Data structures ##
+
+Designated: Sachin Kaul
  
 The process manager maintains six data structures: Time, Cpu, PcbTable, ReadyState, BlockedState, and RunningState. Time is an integer variable initialized to zero. Cpu is used to simulate the execution of a simulated process that is in running state. It should include data members to store a pointer to the program array, current program counter value, integer value, and time slice of that simulated process. In addition, it should store the number of time units used so far in the current time slice.
 
