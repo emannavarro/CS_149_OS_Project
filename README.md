@@ -37,7 +37,7 @@ Reporter Process TBA
 
 ## Simulated Process ##
 
-Designated: Ali Zargari
+Designated: Ali Zargari, Aaron Ooi
 
 Process management simulation manages the execution of simulated processes. Each
 simulated process is comprised of a program that manipulates (sets/updates) the value of a single integer variable. Thus the state of a simulated process at any instant is comprised of the value of its integer variable and the value of its program counter. A simulated process’ program consists of a sequence of instructions. There are seven types of instructions as follows:
