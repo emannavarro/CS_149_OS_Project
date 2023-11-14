@@ -1,3 +1,6 @@
+#include <iostream>
+using namespace std;
+
 #include <stdio.h>
 #include <unistd.h>
 // #include <stdlib.h>
@@ -8,7 +11,6 @@
 #define READ_FD 0
 #define WRITE_FD 1
 
-using namespace std;
 
 int globalTime;
 enum state{READY, RUNNING, BLOCKED};
@@ -41,36 +43,49 @@ int main(){
         exit(1);
     }
     processManagerPID = fork();
+    char* input = " ";
+    while(input != "T") {
+        close(pip[READ_FD]); //Only writing to process manager
+        scanf("%s", input);
+        write(pip[WRITE_FD], &input, 1);
+        if(input == "T") { //Exiting the loop, so we can close the write pipe
+            close(pip[WRITE_FD]); 
+        }
+        sleep(1); //One command per second
+    }
+    if(processManagerPID == -1) {
+        perror("Failed to create process manager\n");
+        exit(1);
+    }
     if(processManagerPID == 0) { //We are in process manager
-        int s = 0;
         //Perform simulation
-        while(s < 5) {
-            printf("s is:%d\n" ,s+1);
-            s++;
-            sleep(1);
+        close(pip[WRITE_FD]); //We are only reading in the process manager
+        while(input != "T"){
+            read(pip[READ_FD], &input, 7);
+
+            // printf("Please enter one of the commands: Q, U, P, T. \n");
+            // scanf("%c", input);
+            const char* userInput = input; 
+            switch(*userInput){
+                case 'Q': 
+                    //Start Simulated code
+                    printf("Q");
+                    break;
+                case 'U':
+                    //Commander code
+                    break;
+                case 'P':
+                    //Simulated code?
+                    break;
+                case 'T':
+                    //Commander code
+                    break;
+            }    
         }
     }
     wait(NULL); //Wait for the simulation to end before exiting the program.
 
-    // while(true){
-    //     char userInput;
-    //     printf("Please enter one of the commands: Q, U, P, T. \n");
-    //     scanf("%c", userInput);
-    //     switch(userInput){
-    //         case 'Q': 
-    //             //Start Simulated code
-    //             break;
-    //         case 'U':
-    //             //Commander code
-    //             break;
-    //         case 'P':
-    //             //Simulated code?
-    //             break;
-    //         case 'T':
-    //             //Commander code
-    //             break;
-    //     }    
-    // }
+    
     return 0;
 }
 
