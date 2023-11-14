@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <sys/queue.h>
-#include <stdbool.h>
+// #include <stdlib.h>
+// #include <sys/queue.h>
+// #include <stdbool.h>
 #include <iostream>
 
 #define READ_FD 0
@@ -10,12 +10,12 @@
 
 using namespace std;
 
-int time;
+int globalTime;
 enum state{READY, RUNNING, BLOCKED};
 //implement queue CPU
 
 typedef struct {
-    int time;
+    int processTime;
     int childID;
     int parentID;
     int* programCounter;
@@ -42,10 +42,16 @@ int main(){
     }
     processManagerPID = fork();
     if(processManagerPID == 0) { //We are in process manager
+        int s = 0;
         //Perform simulation
+        while(s < 5) {
+            printf("s is:%d\n" ,s+1);
+            s++;
+            sleep(1);
+        }
     }
-
     wait(NULL); //Wait for the simulation to end before exiting the program.
+
     // while(true){
     //     char userInput;
     //     printf("Please enter one of the commands: Q, U, P, T. \n");
