@@ -1,34 +1,27 @@
 #include <iostream>
-using namespace std;
-
 #include <stdio.h>
 #include <unistd.h>
-// #include <stdlib.h>
-// #include <sys/queue.h>
-// #include <stdbool.h>
-#include <iostream>
+#include <sys/wait.h>
+#include <queue>
+
+#include "ProcessManager.h"
+#include "Classes.h"
+
+using namespace std;
 
 #define READ_FD 0
 #define WRITE_FD 1
 
 
-int globalTime;
-enum state{READY, RUNNING, BLOCKED};
+int globalTime = 0;
+enum State{READY, RUNNING, BLOCKED};
 //implement queue CPU
 
-typedef struct {
-    int processTime;
-    int childID;
-    int parentID;
-    int* programCounter;
-    int userInteger;
-    int priority;
-    enum state state;
-    int startTime;
-    int cpuTime;
-} PcbBlock;
 
 PcbBlock PcbTable[20];
+CPU cpu;
+deque<int> readyState;
+deque<int> blockedState;
 
 //The state arrays store indexes of PcbTable
 int ReadyState[20];
@@ -38,55 +31,65 @@ int RunningState[1];
 int main(){
     int pip[2];
     pid_t processManagerPID;
+    int result;
+    char input;
     if(pipe(pip) == -1) {
         perror("Failed to create pipe\n");
         exit(1);
     }
     processManagerPID = fork();
-    char* input = " ";
-    while(input != "T") {
-        close(pip[READ_FD]); //Only writing to process manager
-        scanf("%s", input);
-        write(pip[WRITE_FD], &input, 1);
-        if(input == "T") { //Exiting the loop, so we can close the write pipe
-            close(pip[WRITE_FD]); 
-        }
-        sleep(1); //One command per second
-    }
     if(processManagerPID == -1) {
         perror("Failed to create process manager\n");
         exit(1);
     }
     if(processManagerPID == 0) { //We are in process manager
         //Perform simulation
+        cout << "In process manager process" << endl;
         close(pip[WRITE_FD]); //We are only reading in the process manager
-        while(input != "T"){
-            read(pip[READ_FD], &input, 7);
-
-            // printf("Please enter one of the commands: Q, U, P, T. \n");
-            // scanf("%c", input);
-            const char* userInput = input; 
-            switch(*userInput){
-                case 'Q': 
-                    //Start Simulated code
-                    printf("Q");
-                    break;
-                case 'U':
-                    //Commander code
-                    break;
-                case 'P':
-                    //Simulated code?
-                    break;
-                case 'T':
-                    //Commander code
-                    break;
-            }    
-        }
+        result = runProcessManager(pip[READ_FD]);
+        close(pip[READ_FD]); //Clean up
+        _exit(result);
     }
-    wait(NULL); //Wait for the simulation to end before exiting the program.
+    else {
+        do {
+            cout << "Enter Q, P, U or T" << endl;
+            cout << "$ ";
+            cin >> input ;
+            // Pass commands to the process manager process via the pipe.
+            if (write(pip[WRITE_FD], &input, sizeof(input)) != sizeof(input))
+            {
+            // Assume the child process exited, breaking the pipe.
+            break; 
+            }
+        }
+        while (input != 'T');
+        write(pip[WRITE_FD], &input, sizeof(input));
+        close(pip[WRITE_FD]);
+        wait(&result);
+        //     // printf("Please enter one of the commands: Q, U, P, T. \n");
+        //     // scanf("%c", input);
+        //     const char* userInput = input; 
+        //     switch(*userInput){
+        //         case 'Q': 
+        //             //Start Simulated code
+        //             printf("Q");
+        //             break;
+        //         case 'U':
+        //             //Commander code
+        //             break;
+        //         case 'P':
+        //             //Simulated code?
+        //             break;
+        //         case 'T':
+        //             //Commander code
+        //             break;
+        //     }    
+        // }
+    }
+    // wait(NULL); //Wait for the simulation to end before exiting the program.
 
     
-    return 0;
+    return result;
 }
 
 
