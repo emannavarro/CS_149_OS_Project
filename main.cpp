@@ -14,7 +14,6 @@ using namespace std;
 
 
 int globalTime = 0;
-enum State{READY, RUNNING, BLOCKED};
 //implement queue CPU
 
 
