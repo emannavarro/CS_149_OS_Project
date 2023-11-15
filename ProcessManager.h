@@ -5,14 +5,8 @@
 
 #include "Classes.h"
 
-// #include <main.cpp>
 
-int runProcessManager(int fd) {
-    return 0;
-}
-
-bool createProgram(const std::string &file_name, std::vector<Instruction> *pProgram) {
-    return false;
-}
+bool createProgram(const std::string, std::vector<Instruction>);
+int runProcessManager(int fd);
 
 #endif
