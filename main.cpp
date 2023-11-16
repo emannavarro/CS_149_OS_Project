@@ -1,3 +1,6 @@
+
+
+
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
@@ -23,9 +26,9 @@ deque<int> readyState;
 deque<int> blockedState;
 
 //The state arrays store indexes of PcbTable
-int ReadyState[20];
-int BlockedState[20];
-int RunningState[1];
+int readyStateArray[20];
+int blockedStateArray[20];
+int runningState[1];
 
 int main(){
     int pip[2];
@@ -57,8 +60,8 @@ int main(){
             // Pass commands to the process manager process via the pipe.
             if (write(pip[WRITE_FD], &input, sizeof(input)) != sizeof(input))
             {
-            // Assume the child process exited, breaking the pipe.
-            break; 
+                // Assume the child process exited, breaking the pipe.
+                break;
             }
         }
         while (input != 'T');
@@ -67,9 +70,9 @@ int main(){
         wait(&result);
         //     // printf("Please enter one of the commands: Q, U, P, T. \n");
         //     // scanf("%c", input);
-        //     const char* userInput = input; 
+        //     const char* userInput = input;
         //     switch(*userInput){
-        //         case 'Q': 
+        //         case 'Q':
         //             //Start Simulated code
         //             printf("Q");
         //             break;
@@ -82,14 +85,15 @@ int main(){
         //         case 'T':
         //             //Commander code
         //             break;
-        //     }    
+        //     }
         // }
     }
     // wait(NULL); //Wait for the simulation to end before exiting the program.
 
-    
+
     return result;
 }
+
 
 
 
