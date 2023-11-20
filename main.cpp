@@ -30,7 +30,7 @@ int readyStateArray[20];
 int blockedStateArray[20];
 int runningState[1];
 
-int main(){
+int main(int argc, char *argv[]){
     int pip[2];
     pid_t processManagerPID;
     int result;

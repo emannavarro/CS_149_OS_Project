@@ -13,6 +13,7 @@
 #include <sys/wait.h> // for wait()
 #include <unistd.h> // for pipe(), read(), write(), close(), fork(), and _exit()
 #include <vector> // for vector (used for PCB table
+#include <string>
 
 using namespace std;
 
@@ -182,11 +183,6 @@ int runProcessManager(int fileDescriptor)
     double avgTurnaroundTime = 0;
     // Loop until a 'T' is read, then terminate.
     char ch;
-
-
-
-
-
     do {
         // Read a command character from the pipe.
         if (read(fileDescriptor, &ch, sizeof(ch)) != sizeof(ch)) {
@@ -196,15 +192,17 @@ int runProcessManager(int fileDescriptor)
         //TODO: Write a switch statement
         switch (ch) {
             case 'Q':
-
                 quantum();
-
                 break;
             case 'U':
+                //Implement the unblock()
                 cout << "You entered U" << endl;
+                unblock();
                 break;
             case 'P':
+                //Implement the print()
                 cout << "You entered P" << endl;
+                print();
                 break;
             default:
                 cout << "You entered an invalid character!" << endl;
@@ -252,10 +250,14 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
         if (line.size() > 0) {
             Instruction instruction;
             instruction.op = toupper(line[0]);
+            cout << instruction.op << " is instruction.op" << endl;
             instruction.strArg = trim(line.erase(0, 1));
+            cout << instruction.strArg << " is isstruction.strArg" << endl;
             stringstream argStream(instruction.strArg);
             switch (instruction.op) {
                 case 'S': // Integer argument.
+                    cout << "you have selected S, setting value " << instruction.intArg << endl;
+                    break;
                 case 'A': // Integer argument.
                 case 'D': // Integer argument.
                 case 'F': // Integer argument.

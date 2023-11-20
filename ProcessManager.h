@@ -36,4 +36,3 @@ bool createProgram(const string &file_name, vector<Instruction> &pProgram);
 string trim(const std::string &s);
 
 #endif // PROCESSMANAGER_H
-
