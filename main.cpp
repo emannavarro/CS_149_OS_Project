@@ -63,33 +63,11 @@ int main(int argc, char *argv[]){
                 // Assume the child process exited, breaking the pipe.
                 break;
             }
-        }
-        while (input != 'T');
+        }while (input != 'T');
         write(pip[WRITE_FD], &input, sizeof(input));
         close(pip[WRITE_FD]);
         wait(&result);
-        //     // printf("Please enter one of the commands: Q, U, P, T. \n");
-        //     // scanf("%c", input);
-        //     const char* userInput = input;
-        //     switch(*userInput){
-        //         case 'Q':
-        //             //Start Simulated code
-        //             printf("Q");
-        //             break;
-        //         case 'U':
-        //             //Commander code
-        //             break;
-        //         case 'P':
-        //             //Simulated code?
-        //             break;
-        //         case 'T':
-        //             //Commander code
-        //             break;
-        //     }
-        // }
     }
-    // wait(NULL); //Wait for the simulation to end before exiting the program.
-
 
     return result;
 }

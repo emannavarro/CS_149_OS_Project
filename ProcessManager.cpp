@@ -185,6 +185,7 @@ int runProcessManager(int fileDescriptor)
     char ch;
     do {
         // Read a command character from the pipe.
+        cout << "Read a command character from the pipe" << endl;
         if (read(fileDescriptor, &ch, sizeof(ch)) != sizeof(ch)) {
             // Assume the parent process exited, breaking the pipe.
             break;
@@ -203,6 +204,8 @@ int runProcessManager(int fileDescriptor)
                 //Implement the print()
                 cout << "You entered P" << endl;
                 print();
+                break;
+            case 'T':
                 break;
             default:
                 cout << "You entered an invalid character!" << endl;
