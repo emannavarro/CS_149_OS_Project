@@ -101,7 +101,7 @@ void replace(string &argument)
 void quantum()
 {
     Instruction instruction;
-    cout << "In quantum";
+    cout << "In quantum" << endl;
     if (runningState[0] == -1) {
         cout << "No processes are running" << endl;
         //++timestamp;
@@ -206,6 +206,8 @@ int runProcessManager(int fileDescriptor)
                 print();
                 break;
             case 'T':
+                cout << "Terminating. . ." << endl;
+                print();
                 break;
             default:
                 cout << "You entered an invalid character!" << endl;
@@ -256,12 +258,16 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
             cout << instruction.op << " is instruction.op" << endl;
             instruction.strArg = trim(line.erase(0, 1));
             cout << instruction.strArg << " is isstruction.strArg" << endl;
+            instruction.intArg = atoi(instruction.strArg.c_str());
             stringstream argStream(instruction.strArg);
             switch (instruction.op) {
                 case 'S': // Integer argument.
+                    
+                    set(instruction.intArg);
                     cout << "you have selected S, setting value " << instruction.intArg << endl;
                     break;
                 case 'A': // Integer argument.
+                    cout << "You have entered A, adding value " << instruction.intArg << endl;
                 case 'D': // Integer argument.
                 case 'F': // Integer argument.
                     if (!(argStream >> instruction.intArg)) {
