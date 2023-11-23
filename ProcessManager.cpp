@@ -110,6 +110,7 @@ void quantum()
     if (cpu.programCounter < cpu.pProgram->size()) {
         instruction = (*cpu.pProgram)[cpu.programCounter];
         ++cpu.programCounter;
+        cout << "Incremented program counter by 1" << endl;
     } else {
         cout << "End of program reached without E operation" << endl;
         instruction.op = 'E';
@@ -117,7 +118,6 @@ void quantum()
     switch (instruction.op) {
         case 'S':
             set(instruction.intArg);
-
             cout << "instruction S " << instruction.intArg << endl;
             break;
         case 'A':
@@ -140,17 +140,33 @@ void quantum()
             replace(instruction.strArg);
             break;
     }
+    // cout << "current PCB: " << cpu.value << endl;
+    // cout << "current PCB: " << cpu.programCounter << endl;
+    // cout << "current PCB: " << cpu.timeSlice << endl;
+    // cout << "current PCB: " << PcbTable[cpu.programCounter].processedTime << endl;
+    // cout << "current PCB: " << PcbTable[cpu.programCounter].userInteger << endl;
     //++timestamp;
+    
+    //The PCBTable will need to be updated with the current PCBBlock object when context switching
     schedule();
 }
 // Implements the U command.
 void unblock()
 {
     // 1. If the blocked queue contains any processes:
+    if(blockedState.empty()) {
+        cout << "There are no processes that are blocked." << endl;
+        return;
+    }
     // a. Remove a process form the front of the blocked queue.
+    int idx = blockedState.front();
+    blockedState.pop_front();
     // b. Add the process to the ready queue.
+    readyState.push_back(idx);
     // c. Change the state of the process to ready (update its PCB entry).
+    PcbTable[idx].state = READY;
     // 2. Call the schedule() function to give an unblocked process a chance to run (if possible).
+    schedule();
 }
 // Implements the P command.
 void print()
