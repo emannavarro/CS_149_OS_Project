@@ -15,6 +15,8 @@ extern int runningState[1];
 extern deque<int> readyState;
 extern deque<int> blockedState;
 extern PcbBlock PcbTable[20];
+extern int globalTime;
+extern int programIndexCounter;
 
 
 // Function declarations

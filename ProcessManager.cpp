@@ -48,13 +48,18 @@ void block()
 {
     // TODO: Implement
     // 1. Add the PCB index of the running process (stored in runningState) to the blocked queue.
+    int idx = runningState[0];
     // 2. Update the process's PCB entry
     // a. Change the PCB's state to blocked.
+    PcbTable[idx].state = BLOCKED;
     // b. Store the CPU program counter in the PCB's program
     //counter.
+    PcbTable[idx].programCounter = cpu.programCounter;
     // c. Store the CPU's value in the PCB's value.
+    PcbTable[idx].userInteger = cpu.value;
     // 3. Update the running state to -1 (basically mark no process as running). Note that a new process will be chosen to run later (via the
     // Q command code calling the schedule() function).
+    runningState[0] = -1;
 }
 
 // Implements the E operation.
@@ -89,12 +94,24 @@ void fork(int value)
 // Implements the R operation.
 void replace(string &argument)
 {
+/*
+    Not sure if this implementation is correct
+*/
+
     // TODO: Implement
     // 1. Clear the CPU's program (cpu.pProgram->clear()).
+    cpu.pProgram->clear();
     // 2. Use createProgram() to read in the filename specified by argument into the CPU (*cpu.pProgram)
+    if (!createProgram(argument, PcbTable[programIndexCounter].program)) {
+        cout << "Error opening " << argument << endl;
+        cpu.programCounter++;
+        return;
+    }
     //  a. Consider what to do if createProgram fails. I printed an error, incremented the cpu program counter and then
     //  returned. Note that createProgram can fail if the file could not be opened or did not exist.
     // 3. Set the program counter to 0.
+    PcbTable[programIndexCounter].programCounter = 0;
+
 }
 
 // Implements the Q command.
