@@ -2,3 +2,5 @@
 main.dSYM/*
 .DS_Store
 *.exe
+*.o
+
