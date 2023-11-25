@@ -16,7 +16,8 @@ extern deque<int> readyState;
 extern deque<int> blockedState;
 extern PcbBlock PcbTable[20];
 extern int globalTime;
-extern int programIndexCounter;
+extern int programIndexCounter; //Keep track of which is the next available index
+extern int terminatedProcess;
 
 
 // Function declarations

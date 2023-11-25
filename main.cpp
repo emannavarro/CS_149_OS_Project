@@ -16,18 +16,14 @@ using namespace std;
 #define WRITE_FD 1
 
 
-int globalTime = 0;
-//implement queue CPU
-
+int globalTime;
+int terminatedProcess;
+int programIndexCounter;
 
 PcbBlock PcbTable[20];
 CPU cpu;
 deque<int> readyState;
 deque<int> blockedState;
-
-//The state arrays store indexes of PcbTable
-int readyStateArray[20];
-int blockedStateArray[20];
 int runningState[1];
 
 int main(int argc, char *argv[]){

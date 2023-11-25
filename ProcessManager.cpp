@@ -67,9 +67,16 @@ void end()
 {
     // TODO: Implement
     // 1. Get the PCB entry of the running process.
+    int idx = runningState[0];
     // 2. Update the cumulative time difference (increment it by timestamp + 1 - start time of the process).
+    /*
+        Not sure what is the use of the cumulative time difference
+    */
+    PcbTable[idx].processedTime = globalTime + 1 - PcbTable[idx].startTime;
     // 3. Increment the number of terminated processes.
+    terminatedProcess++;
     // 4. Update the running state to -1 (basically mark no process as running). Note that a new process will be chosen to run later (via the Q command code calling the schedule function).
+    runningState[0] = -1;
 }
 
 // Implements the F operation.
@@ -77,18 +84,35 @@ void fork(int value)
 {
     // TODO: Implement
     // 1. Get a free PCB index (pcbTable.size())
+    int idx = ++programIndexCounter;
     // 2. Get the PCB entry for the current running process.
+    PcbBlock currProcess = PcbTable[idx-1];
+    PcbBlock childProcess;
     // 3. Ensure the passed-in value is not out of bounds.
+    if(programIndexCounter + value >= (sizeof(PcbTable) / sizeof(PcbBlock))) {
+        cout << "Out of bound, unable to allocate memory" << endl;
+        exit(1);
+    }
     // 4. Populate the PCB entry obtained in #1
     // a. Set the process ID to the PCB index obtained in #1.
+    childProcess.childID = idx;
     // b. Set the parent process ID to the process ID of the running process (use the running process's PCB entry to get this).
+    childProcess.parentID = currProcess.childID;
     // c. Set the program counter to the cpu program counter.
+    childProcess.programCounter = cpu.programCounter;
     // d. Set the value to the cpu value.
+    childProcess.userInteger = cpu.value;
     // e. Set the priority to the same as the parent process's priority.
+    childProcess.priority = currProcess.priority;
     // f. Set the state to the ready state.
+    childProcess.state = READY;
     // g. Set the start time to the current timestamp
+    childProcess.startTime = globalTime;
     // 5. Add the pcb index to the ready queue.
+    readyState.push_back(idx);
+    PcbTable[idx] = childProcess;
     // 6. Increment the cpu's program counter by the value read in #3
+    cpu.programCounter += value; //Not sure if I am doing this correct
 }
 
 // Implements the R operation.
@@ -121,7 +145,7 @@ void quantum()
     cout << "In quantum" << endl;
     if (runningState[0] == -1) {
         cout << "No processes are running" << endl;
-        //++timestamp;
+        ++globalTime;
         return;
     }
     if (cpu.programCounter < cpu.pProgram->size()) {
@@ -157,12 +181,7 @@ void quantum()
             replace(instruction.strArg);
             break;
     }
-    // cout << "current PCB: " << cpu.value << endl;
-    // cout << "current PCB: " << cpu.programCounter << endl;
-    // cout << "current PCB: " << cpu.timeSlice << endl;
-    // cout << "current PCB: " << PcbTable[cpu.programCounter].processedTime << endl;
-    // cout << "current PCB: " << PcbTable[cpu.programCounter].userInteger << endl;
-    //++timestamp;
+    ++globalTime;
     
     //The PCBTable will need to be updated with the current PCBBlock object when context switching
     schedule();
@@ -212,7 +231,9 @@ int runProcessManager(int fileDescriptor)
     cpu.pProgram = &(PcbTable[0].program);
     cpu.programCounter = PcbTable[0].programCounter;
     cpu.value = PcbTable[0].userInteger;
-    //timestamp = 0;
+    terminatedProcess = 0;
+    globalTime = 0;
+    programIndexCounter = 0;
     double avgTurnaroundTime = 0;
     // Loop until a 'T' is read, then terminate.
     char ch;
@@ -288,20 +309,22 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
         if (line.size() > 0) {
             Instruction instruction;
             instruction.op = toupper(line[0]);
-            cout << instruction.op << " is instruction.op" << endl;
             instruction.strArg = trim(line.erase(0, 1));
-            cout << instruction.strArg << " is isstruction.strArg" << endl;
             instruction.intArg = atoi(instruction.strArg.c_str());
             stringstream argStream(instruction.strArg);
             switch (instruction.op) {
                 case 'S': // Integer argument.
-                    
                     set(instruction.intArg);
-                    cout << "you have selected S, setting value " << instruction.intArg << endl;
+                    cout << "Read S from createProgram, setting value " << instruction.intArg << endl;
                     break;
                 case 'A': // Integer argument.
-                    cout << "You have entered A, adding value " << instruction.intArg << endl;
+                    cout << "Read A from createProgram, adding value " << instruction.intArg << endl;
+                    add(instruction.intArg);
+                    break;
                 case 'D': // Integer argument.
+                    cout << "Read A from createProgram, adding value " << instruction.intArg << endl;
+                    decrement(instruction.intArg);
+                    break;
                 case 'F': // Integer argument.
                     if (!(argStream >> instruction.intArg)) {
                         cout << file_name << ":" << lineNum
