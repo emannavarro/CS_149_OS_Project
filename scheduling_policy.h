@@ -1,6 +1,17 @@
 #ifndef scheduling_policy_H
 #define scheduling_policy_H
 #include <queue>
+#include <vector>
+#include <deque>
+
+enum State {
+highestPriorityQueue,
+secondHighestPriorityQueue,
+thirdHighestPriorityQueue,
+lowestPriorityQueue
+
+};
+using IntPair = std::pair<int, int>;
 
 class scheduling_policy{
 
@@ -14,22 +25,15 @@ Under construction, class definition not complete
 public:
 scheduling_policy();
 ~scheduling_policy();
-void insert_highestPriorityQueue(int a){highestPriorityQueue->push(a);};
-void insert_secondHighestPriorityQueue(int b){secondHighestPriorityQueue->push(b);};
-void insert_thirdHighestPriorityQueue(int c){thirdHighestPriorityQueue->push(c);};
-void insert_lowestPriorityQueue(int d){lowestPriorityQueue->push(d);};
-
+void schedule(int RunningState);
+std::pair<int, int> update_ready_que();
+void block();
+void insert_highestPriorityQueue(int priority, int pcbindex);
+void insert_secondHighestPriorityQueue(int priority, int pcbindex);
+void insert_thirdHighestPriorityQueue(int priority, int pcbindex);
+void insert_lowestPriorityQueue(int priority, int pcbindex);
 private:
-
-std::priority_queue<int, std::vector<int>, std::greater<int> >* highestPriorityQueue;
-std::priority_queue<int, std::vector<int>, std::greater<int> >* secondHighestPriorityQueue;
-std::priority_queue<int, std::vector<int>, std::greater<int> >* thirdHighestPriorityQueue;
-std::priority_queue<int, std::vector<int>, std::greater<int> >* lowestPriorityQueue;
-
-
-
-
-
+std::priority_queue<std::pair<int,int> , std::vector<std::pair<int,int> >, std::greater<std::pair<int,int> > >* Priorityarray;
 
 };
 
