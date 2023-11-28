@@ -16,6 +16,7 @@
 #include <string>
 
 using namespace std;
+using IntPair = std::pair<int,int>;
 
 void set(int value) {
     cpu.value = value;
@@ -210,7 +211,46 @@ void unblock()
 void print()
 {
     cout << "In print" << endl;
-    cout << cpu.timeSliceUsed << endl;
+
+    cout << "Current time: " << globalTime << endl;
+
+    cout << "Running process:" << endl;
+    cout << "pid: " << PcbTable[runningState[0]].childID << endl;
+    cout << "ppid: " << PcbTable[runningState[0]].parentID << endl; 
+    cout << "priority: " << PcbTable[runningState[0]].priority << endl;
+    cout << "value: " << PcbTable[runningState[0]].userInteger << endl;
+    cout << "start time: " << PcbTable[runningState[0]].startTime << endl;
+    cout << "CPU time used so far: " << PcbTable[runningState[0]].processedTime << endl;
+
+    cout << "Blocked processes: " << endl;
+    cout << "Queue of blocked processes: " << endl;
+    for(int i = 0; i < blockedState.size(); i++) {
+        cout << "pid: " << PcbTable[blockedState[i]].childID << endl;
+        cout << "ppid: " << PcbTable[blockedState[i]].parentID << endl; 
+        cout << "priority: " << PcbTable[blockedState[i]].priority << endl;
+        cout << "value: " << PcbTable[blockedState[i]].userInteger << endl;
+        cout << "start time: " << PcbTable[blockedState[i]].startTime << endl;
+        cout << "CPU time used so far: " << PcbTable[blockedState[i]].processedTime << endl;
+        cout << "\n\n";
+    }
+
+    cout << "Processes ready to execute: " << endl;
+    /*
+        Waiting for the schedule() to be implemented before I can concretely implement this part
+    */
+    // for(int i = 0; i < 4; i++) {
+    //     cout << "Queue of processes with priority " << i << ": " << endl;
+    //     for(int j = 0; j < Priorityarray[highestPriorityQueue].size(); j++) {
+    //         IntPair = Priorityarray[highestPriorityQueue][j];
+    //         cout << "pid: " << PcbTable[Priorityarray[i]].childID << endl;
+    //         cout << "ppid: " << PcbTable[Priorityarray[i]].parentID << endl; 
+    //         cout << "priority: " << PcbTable[Priorityarray[i]].priority << endl;
+    //         cout << "value: " << PcbTable[Priorityarray[i]].userInteger << endl;
+    //         cout << "start time: " << PcbTable[Priorityarray[i]].startTime << endl;
+    //         cout << "CPU time used so far: " << PcbTable[Priorityarray[i]].processedTime << endl;
+    //         cout << "\n\n";
+    //     }
+    // }
 }
 
 // Function that implements the process manager.
@@ -233,7 +273,7 @@ int runProcessManager(int fileDescriptor)
 
     cpu.pProgram = &(PcbTable[0].program);
     cpu.programCounter = PcbTable[0].programCounter;
-    cpu.value = PcbTable[0].userInteger;
+    cpu.value = PcbTable[0].userInteger; 
     terminatedProcess = 0;
     globalTime = 0;
     programIndexCounter = 0;
