@@ -151,7 +151,7 @@ void quantum()
     if (cpu.programCounter < cpu.pProgram->size()) {
         instruction = (*cpu.pProgram)[cpu.programCounter];
         ++cpu.programCounter;
-        cout << "Incremented program counter by 1" << endl;
+        cout << "Incremented program counter by 1 and program counter is currently: " << cpu.programCounter << endl;
     } else {
         cout << "End of program reached without E operation" << endl;
         instruction.op = 'E';
@@ -160,10 +160,12 @@ void quantum()
         case 'S':
             set(instruction.intArg);
             cout << "instruction S " << instruction.intArg << endl;
+            cout << "Current process value is " << PcbTable[runningState[0]].userInteger << endl;
             break;
         case 'A':
             add(instruction.intArg);
             cout << "instruction A " << instruction.intArg << endl;
+            cout << "Current process value is " << PcbTable[runningState[0]].userInteger << endl;
             break;
         case 'D':
             decrement(instruction.intArg);
@@ -207,7 +209,8 @@ void unblock()
 // Implements the P command.
 void print()
 {
-    cout << "Print command is not implemented until iLab 3" << endl;
+    cout << "In print" << endl;
+    cout << cpu.timeSliceUsed << endl;
 }
 
 // Function that implements the process manager.
