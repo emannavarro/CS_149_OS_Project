@@ -15,6 +15,9 @@ extern int runningState[1];
 extern deque<int> readyState;
 extern deque<int> blockedState;
 extern PcbBlock PcbTable[20];
+extern int globalTime;
+extern int programIndexCounter; //Keep track of which is the next available index
+extern int terminatedProcess;
 
 
 // Function declarations
@@ -36,4 +39,3 @@ bool createProgram(const string &file_name, vector<Instruction> &pProgram);
 string trim(const std::string &s);
 
 #endif // PROCESSMANAGER_H
-
