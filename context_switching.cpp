@@ -1,37 +1,27 @@
 #include <vector>
 #include <string>
+#include <cassert>
+#include <iostream>
+#include "context_switching.h"
 
-class Cpu {
-public:
-std::vector<Instruction> *pProgram;
-int programCounter;
-int value;
-int timeSlice;
-int timeSliceUsed;
-};
 
-class Instruction {
-public:
-char operation;
-int intArg;
-std::string stringArg;
-};
+void context_switch_saving(int currentprocesspcbindex,Cpu &cpu,PcbEntry PcbTable[] ){
 
-enum State {
-STATE_READY,
-STATE_RUNNING,
-STATE_BLOCKED
-};
+    // Saving values of current proccess in the PCB
+    PcbTable[currentprocesspcbindex].programCounter = cpu.programCounter;
+    PcbTable[currentprocesspcbindex].value = cpu.value;
+    PcbTable[currentprocesspcbindex].timeUsed = cpu.timeSliceUsed;
+    PcbTable[currentprocesspcbindex].state = STATE_BLOCKED;
+}
 
-class PcbEntry {
-public:
-int processId;
-int parentProcessId;
-std::vector<Instruction> program;
-unsigned int programCounter;
-int value;
-unsigned int priority;
-State state;
-unsigned int startTime;
-unsigned int timeUsed;
-};
+void context_switch_Loading(int nextprocesspcbindex,Cpu &cpu, PcbEntry PcbTable[] ){
+
+    // Loading values of current proccess PCB into CPU 
+    *cpu.pProgram = PcbTable[nextprocesspcbindex].program;
+    cpu.programCounter = PcbTable[nextprocesspcbindex].programCounter;
+    cpu.value = PcbTable[nextprocesspcbindex].value;
+    cpu.timeSliceUsed = PcbTable[nextprocesspcbindex].timeUsed;
+    // Update PCB block next process as running
+    PcbTable[nextprocesspcbindex].state = STATE_RUNNING;
+
+}
