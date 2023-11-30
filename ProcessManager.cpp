@@ -1,6 +1,7 @@
 
 
 #include "ProcessManager.h"
+#include "scheduling_policy.h"
 #include <cctype> // for toupper()
 #include <cstdlib> // for EXIT_SUCCESS and EXIT_FAILURE
 #include <cstring> // for strerror()
@@ -238,19 +239,22 @@ void print()
     /*
         Waiting for the schedule() to be implemented before I can concretely implement this part
     */
-    // for(int i = 0; i < 4; i++) {
-    //     cout << "Queue of processes with priority " << i << ": " << endl;
-    //     for(int j = 0; j < Priorityarray[highestPriorityQueue].size(); j++) {
-    //         IntPair = Priorityarray[highestPriorityQueue][j];
-    //         cout << "pid: " << PcbTable[Priorityarray[i]].childID << endl;
-    //         cout << "ppid: " << PcbTable[Priorityarray[i]].parentID << endl; 
-    //         cout << "priority: " << PcbTable[Priorityarray[i]].priority << endl;
-    //         cout << "value: " << PcbTable[Priorityarray[i]].userInteger << endl;
-    //         cout << "start time: " << PcbTable[Priorityarray[i]].startTime << endl;
-    //         cout << "CPU time used so far: " << PcbTable[Priorityarray[i]].processedTime << endl;
-    //         cout << "\n\n";
-    //     }
-    // }
+    for(int i = 0; i < 4; i++) {
+        cout << "Queue of processes with priority " << i << ": " << endl;
+        
+        std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<std::pair<int, int>>> tempPriorityarray = Priorityarray[i];
+        while(!tempPriorityarray.empty()) {
+            IntPair pair = tempPriorityarray.top();
+            cout << "pid: " << PcbTable[pair.second].childID << endl;
+            cout << "ppid: " << PcbTable[pair.second].parentID << endl; 
+            cout << "priority: " << PcbTable[pair.second].priority << endl;
+            cout << "value: " << PcbTable[pair.second].userInteger << endl;
+            cout << "start time: " << PcbTable[pair.second].startTime << endl;
+            cout << "CPU time used so far: " << PcbTable[pair.second].processedTime << endl;
+            cout << "\n\n";
+            tempPriorityarray.pop();
+        }
+    }
 }
 
 // Function that implements the process manager.

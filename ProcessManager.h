@@ -6,6 +6,7 @@
 #include "Classes.h"
 #include <string>
 #include <vector>
+#include <queue>
 #include <deque>
 
 using namespace std;
@@ -18,6 +19,9 @@ extern PcbBlock PcbTable[20];
 extern int globalTime;
 extern int programIndexCounter; //Keep track of which is the next available index
 extern int terminatedProcess;
+std::priority_queue<std::pair<int,int> , std::vector<std::pair<int,int> >, std::greater<std::pair<int,int> > >* Priorityarray 
+    = new std::priority_queue<std::pair<int,int> , std::vector<std::pair<int,int> >, std::greater<std::pair<int,int> > > [4];
+
 
 
 // Function declarations

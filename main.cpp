@@ -26,6 +26,7 @@ deque<int> readyState;
 deque<int> blockedState;
 int runningState[1];
 
+
 int main(int argc, char *argv[]){
     int pip[2];
     pid_t processManagerPID;

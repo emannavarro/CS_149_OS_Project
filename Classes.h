@@ -13,11 +13,23 @@ using namespace std;
 
 enum State{READY, RUNNING, BLOCKED};
 
+enum prioritylevel{
+    highestPriorityQueue,
+    secondHighestPriorityQueue,
+    thirdHighestPriorityQueue,
+    lowestPriorityQueue
+};
+
 class Instruction {
 public:
     char op;
     int intArg;
     std::string strArg;
+    bool operator==(const Instruction& other) const {
+        return op == other.op &&
+               intArg == other.intArg &&
+               strArg == other.strArg;
+    }
 };
 
 class CPU {
