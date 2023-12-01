@@ -8,12 +8,12 @@
 #include <ctime>   // for std::time
 #include "Classes.h"
 
-
+using namespace std;
 
 scheduling_policy::scheduling_policy()
 {
 
-    Priorityarray= new std::priority_queue<std::pair<int,int> , std::vector<std::pair<int,int> >, std::greater<std::pair<int,int> > > [4];
+    Priorityarray = new priority_queue <pair<int,int>, vector<pair<int,int> >, greater<pair<int,int> > > [4];
 }
 
 scheduling_policy::~scheduling_policy()

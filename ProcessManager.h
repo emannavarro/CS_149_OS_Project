@@ -4,6 +4,7 @@
 #define PROCESSMANAGER_H
 
 #include "Classes.h"
+#include "scheduling_policy.h"
 #include <string>
 #include <vector>
 #include <deque>
@@ -11,6 +12,7 @@
 using namespace std;
 
 extern CPU cpu;
+extern scheduling_policy schedulingPolicy;
 extern int runningState[1];
 extern deque<int> readyState;
 extern deque<int> blockedState;

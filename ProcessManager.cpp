@@ -32,6 +32,11 @@ void decrement(int value) {
 // Performs scheduling.
 void schedule()
 {
+
+
+    schedulingPolicy.schedule(runningState[0], programIndexCounter, readyState, cpu, PcbTable);
+    /**
+
     // TODO: Implement
     // 1. Return if there is still a processing running
     if(runningState[0] != -1) {
@@ -65,7 +70,11 @@ void schedule()
     // 4. If we were not able to get a new process to run, print an error message.
     cout << "Unable to get a new process to run" << endl;
     // 5. Return
-    return;
+
+
+
+
+    **/
 
 
 }
@@ -136,10 +145,14 @@ void fork(int value)
     // g. Set the start time to the current timestamp
     childProcess.startTime = globalTime;
     // 5. Add the pcb index to the ready queue.
-    readyState.push_back(idx);
+    //readyState.push_back(idx);  //gets updated in schedule function in scheduling_policy.cpp
     PcbTable[idx] = childProcess;
     // 6. Increment the cpu's program counter by the userInteger read in #3
     cpu.programCounter += value; //Not sure if I am doing this correct
+
+    schedulingPolicy.Scheduleling_Algorithm(childProcess.priority, idx);
+
+
 }
 
 // Implements the R op.
