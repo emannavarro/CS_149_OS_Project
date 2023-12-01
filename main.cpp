@@ -24,7 +24,7 @@ PcbBlock PcbTable[20];
 CPU cpu;
 deque<int> readyState;
 deque<int> blockedState;
-int runningState[1];
+int runningState[1]; //?
 
 int main(int argc, char *argv[]){
     int pip[2];
@@ -67,6 +67,7 @@ int main(int argc, char *argv[]){
 
     return result;
 }
+
 
 
 

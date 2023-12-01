@@ -34,16 +34,43 @@ void schedule()
 {
     // TODO: Implement
     // 1. Return if there is still a processing running
+    if(runningState[0] != -1) {
+        cout << "There is still a process running" << endl;
+        return;
+    }
     // (runningState != -1). There is no need to schedule if a process is already running (at least until iLab 3)
     // 2. Get a new process to run, if possible, from the ready queue.
+    if(readyState.empty()) {
+        cout << "There are no processes in the ready queue" << endl;
+        //----
+        return;
+    }
     // 3. If we were able to get a new process to run:
-    // a. Mark the processing as running (update the new process's PCB state)
-    // b. Update the CPU structure with the PCB entry details
-    // (program, program counter, value, etc.)
+    // a. Remove the process from the ready queue.
+    int idx = readyState.front();
+    readyState.pop_back();
+
+    // b. Update the running state to the process's PCB index.
+    runningState[0] = idx;
+    // c. Update the process's PCB entry
+    // i. Change the state to running.
+    PcbTable[idx].state = RUNNING;
+    // ii. Update the start time to the current timestamp.
+    PcbTable[idx].startTime = globalTime;
+    // iii. Update the CPU structure with the PCB entry details
+    // (program, program counter, userInteger, etc.)
+    cpu.pProgram = &(PcbTable[idx].program);
+    cpu.programCounter = PcbTable[idx].programCounter;
+    cpu.value = PcbTable[idx].userInteger;
+    // 4. If we were not able to get a new process to run, print an error message.
+    cout << "Unable to get a new process to run" << endl;
+    // 5. Return
+    return;
+
 
 }
 
-// Implements the B operation.
+// Implements the B op.
 void block()
 {
     // TODO: Implement
@@ -55,14 +82,14 @@ void block()
     // b. Store the CPU program counter in the PCB's program
     //counter.
     PcbTable[idx].programCounter = cpu.programCounter;
-    // c. Store the CPU's value in the PCB's value.
+    // c. Store the CPU's userInteger in the PCB's userInteger.
     PcbTable[idx].userInteger = cpu.value;
     // 3. Update the running state to -1 (basically mark no process as running). Note that a new process will be chosen to run later (via the
     // Q command code calling the schedule() function).
     runningState[0] = -1;
 }
 
-// Implements the E operation.
+// Implements the E op.
 void end()
 {
     // TODO: Implement
@@ -79,7 +106,7 @@ void end()
     runningState[0] = -1;
 }
 
-// Implements the F operation.
+// Implements the F op.
 void fork(int value)
 {
     // TODO: Implement
@@ -88,7 +115,7 @@ void fork(int value)
     // 2. Get the PCB entry for the current running process.
     PcbBlock currProcess = PcbTable[idx-1];
     PcbBlock childProcess;
-    // 3. Ensure the passed-in value is not out of bounds.
+    // 3. Ensure the passed-in userInteger is not out of bounds.
     if(programIndexCounter + value >= (sizeof(PcbTable) / sizeof(PcbBlock))) {
         cout << "Out of bound, unable to allocate memory" << endl;
         exit(1);
@@ -100,7 +127,7 @@ void fork(int value)
     childProcess.parentID = currProcess.childID;
     // c. Set the program counter to the cpu program counter.
     childProcess.programCounter = cpu.programCounter;
-    // d. Set the value to the cpu value.
+    // d. Set the userInteger to the cpu userInteger.
     childProcess.userInteger = cpu.value;
     // e. Set the priority to the same as the parent process's priority.
     childProcess.priority = currProcess.priority;
@@ -111,11 +138,11 @@ void fork(int value)
     // 5. Add the pcb index to the ready queue.
     readyState.push_back(idx);
     PcbTable[idx] = childProcess;
-    // 6. Increment the cpu's program counter by the value read in #3
+    // 6. Increment the cpu's program counter by the userInteger read in #3
     cpu.programCounter += value; //Not sure if I am doing this correct
 }
 
-// Implements the R operation.
+// Implements the R op.
 void replace(string &argument)
 {
 /*
@@ -153,19 +180,19 @@ void quantum()
         ++cpu.programCounter;
         cout << "Incremented program counter by 1 and program counter is currently: " << cpu.programCounter << endl;
     } else {
-        cout << "End of program reached without E operation" << endl;
+        cout << "End of program reached without E op" << endl;
         instruction.op = 'E';
     }
     switch (instruction.op) {
         case 'S':
             set(instruction.intArg);
             cout << "instruction S " << instruction.intArg << endl;
-            cout << "Current process value is " << PcbTable[runningState[0]].userInteger << endl;
+            cout << "Current process userInteger is " << PcbTable[runningState[0]].userInteger << endl;
             break;
         case 'A':
             add(instruction.intArg);
             cout << "instruction A " << instruction.intArg << endl;
-            cout << "Current process value is " << PcbTable[runningState[0]].userInteger << endl;
+            cout << "Current process userInteger is " << PcbTable[runningState[0]].userInteger << endl;
             break;
         case 'D':
             decrement(instruction.intArg);
@@ -216,11 +243,12 @@ void print()
 // Function that implements the process manager.
 int runProcessManager(int fileDescriptor)
 {
-//vector<PcbEntry> pcbTable;
+//vector<PcbBlock> pcbTable;
     // Attempt to create the init process.
     if (!createProgram("init", PcbTable[0].program)) {
         return EXIT_FAILURE;
     }
+
     PcbTable[0].childID = 0;
     PcbTable[0].parentID = -1;
     PcbTable[0].programCounter = 0;
@@ -318,14 +346,14 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
             switch (instruction.op) {
                 case 'S': // Integer argument.
                     set(instruction.intArg);
-                    cout << "Read S from createProgram, setting value " << instruction.intArg << endl;
+                    cout << "Read S from createProgram, setting userInteger " << instruction.intArg << endl;
                     break;
                 case 'A': // Integer argument.
-                    cout << "Read A from createProgram, adding value " << instruction.intArg << endl;
+                    cout << "Read A from createProgram, adding userInteger " << instruction.intArg << endl;
                     add(instruction.intArg);
                     break;
                 case 'D': // Integer argument.
-                    cout << "Read A from createProgram, adding value " << instruction.intArg << endl;
+                    cout << "Read A from createProgram, adding userInteger " << instruction.intArg << endl;
                     decrement(instruction.intArg);
                     break;
                 case 'F': // Integer argument.
@@ -333,7 +361,7 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
                         cout << file_name << ":" << lineNum
                              << " - Invalid integer argument "
                              << instruction.strArg << " for "
-                             << instruction.op << " operation"
+                             << instruction.op << " op"
                              << endl;
                         file.close();
                         return false;
@@ -352,7 +380,7 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
                     }
                     break;
                 default:
-                    cout << file_name << ":" << lineNum << " - Invalid operation, " << instruction.op << endl;
+                    cout << file_name << ":" << lineNum << " - Invalid op, " << instruction.op << endl;
                     file.close();
                     return false;
             }

@@ -23,11 +23,11 @@ The commander process first creates a pipe and then a process manager process. I
 3.	P: Print the current state of the system.
 4.	T: Print the average turnaround time and terminate the system. Command T appears exactly once, being the last command. Simulated Process
 Process management simulation manages the execution of simulated processes. Each
-simulated process is comprised of a program that manipulates (sets/updates) the value of a single integer variable. Thus the state of a simulated process at any instant is comprised of the value of its integer variable and the value of its program counter. A simulated process’ program consists of a sequence of instructions. There are seven types of instructions as follows:
+simulated process is comprised of a program that manipulates (sets/updates) the userInteger of a single integer variable. Thus the state of a simulated process at any instant is comprised of the userInteger of its integer variable and the userInteger of its program counter. A simulated process’ program consists of a sequence of instructions. There are seven types of instructions as follows:
 
-1.	S n: Set the value of the integer variable to n, where n is an integer.
-2.	A n: Add n to the value of the integer variable, where n is an integer.
-3.	D n: Subtract n from the value of the integer variable, where n is an integer. 
+1.	S n: Set the userInteger of the integer variable to n, where n is an integer.
+2.	A n: Add n to the userInteger of the integer variable, where n is an integer.
+3.	D n: Subtract n from the userInteger of the integer variable, where n is an integer. 
 4.	B: Block this simulated process.
 5.	E: Terminate this simulated process.
 6.	F n: Create a new simulated process. The new (simulated) process is an exact copy of the parent (simulated) process. The new (simulated) process executes from the instruction immediately after this (F) instruction, while the parent (simulated) process continues its execution n instructions after the next instruction.
@@ -57,9 +57,9 @@ The process manager creates the first simulated process (process id = 0). Progra
 
 Designated: Sachin Kaul
  
-The process manager maintains six data structures: Time, Cpu, PcbTable, ReadyState, BlockedState, and RunningState. Time is an integer variable initialized to zero. Cpu is used to simulate the execution of a simulated process that is in running state. It should include data members to store a pointer to the program array, current program counter value, integer value, and time slice of that simulated process. In addition, it should store the number of time units used so far in the current time slice.
+The process manager maintains six data structures: Time, Cpu, PcbTable, ReadyState, BlockedState, and RunningState. Time is an integer variable initialized to zero. Cpu is used to simulate the execution of a simulated process that is in running state. It should include data members to store a pointer to the program array, current program counter userInteger, integer userInteger, and time slice of that simulated process. In addition, it should store the number of time units used so far in the current time slice.
 
-PcbTable is an array with one entry for every simulated process that hasn't finished its execution yet. Each entry should include data members to store process id, parent process id, a pointer to program counter value (initially 0), integer value, priority, state, start time, and CPU time used so far.
+PcbTable is an array with one entry for every simulated process that hasn't finished its execution yet. Each entry should include data members to store process id, parent process id, a pointer to program counter userInteger (initially 0), integer userInteger, priority, state, start time, and CPU time used so far.
 
 ReadyState stores all simulated processes (PcbTable indices) that are ready to run. This can be implemented using a queue or priority queue data structure. BlockedState stores all processes (PcbTable indices) that are currently blocked. This can be implemented using a queue data structure. Finally, RunningState stores the PcbTable index of the currently running simulated process.
 
@@ -67,7 +67,7 @@ ReadyState stores all simulated processes (PcbTable indices) that are ready to r
 
 Designated: Ali Zargari, Aaron Ooi
 
-After creating the first process and initializing all its data structures, the process manager repeatedly receives and processes one command at a time from the commander process (read via the pipe). On receiving a Q command, the process manager executes the next instruction of the currently running simulated process, increments program counter value (except for For R instructions), increments Time, and then performs scheduling. Note that scheduling may involve performing context switching.
+After creating the first process and initializing all its data structures, the process manager repeatedly receives and processes one command at a time from the commander process (read via the pipe). On receiving a Q command, the process manager executes the next instruction of the currently running simulated process, increments program counter userInteger (except for For R instructions), increments Time, and then performs scheduling. Note that scheduling may involve performing context switching.
 
 On receiving a U command, the process manager moves the first simulated process in the blocked queue to the ready state queue array. On receiving a P command, the process manager spawns a new reporter process. On receiving a T command, the process manager first spawns a reporter process and then terminates after termination of the reporter process. The process manager ensures that no more than one reporter process is running at any moment.
 
@@ -77,10 +77,10 @@ Designated: Ali Zargari, Aaron Ooi
 
 The process manager executes the next instruction of the currently running simulated process on receiving a Q command from the commander process. Note that this execution is completely confined to the Cpu data structure, i.e. PcbTable is not accessed.
 
-Instructions S, A and D update the integer value stored in Cpu. Instruction B moves the currently running simulated process to the blocked state and moves a process from the ready state to the running state. This will result in a context switch. Instruction E terminates the currently running simulated process, frees up all memory (e.g. program array) associated with that process and updates the PcbTable. A simulated process from the ready state is moved to running state. This also results in a context switch.
+Instructions S, A and D update the integer userInteger stored in Cpu. Instruction B moves the currently running simulated process to the blocked state and moves a process from the ready state to the running state. This will result in a context switch. Instruction E terminates the currently running simulated process, frees up all memory (e.g. program array) associated with that process and updates the PcbTable. A simulated process from the ready state is moved to running state. This also results in a context switch.
 
-Instruction F results in the creation of a new simulated process. A new entry is created in the PcbTable for this new simulated process. A new (unique) process id is assigned and the parent process id is process id of the parent simulated process. Start time is set to the current Time value and CPU time used so far is set to 0. The program array and integer value of the new simulated process are a copy of the program array and integer value of the parent simulated process. The new simulated process has the same priority as the parent simulated process. The program counter value of the new simulated process is set to the instruction immediately after the F instruction, while the program counter value of the of the parent simulated process is set to n instructions after the next instruction (instruction immediately after F. The new simulated process is created in the ready state.
-Finally, the R instruction results in replacing the process image of the currently running simulated process. Its program array is overwritten by the code in file filename, program counter value is set to 0, and integer value is undefined. Note that all these changes are made only in the Cpu data structure. Process id, parent process id, start time, CPU time used so far, state, and priority remain unchanged.
+Instruction F results in the creation of a new simulated process. A new entry is created in the PcbTable for this new simulated process. A new (unique) process id is assigned and the parent process id is process id of the parent simulated process. Start time is set to the current Time userInteger and CPU time used so far is set to 0. The program array and integer userInteger of the new simulated process are a copy of the program array and integer userInteger of the parent simulated process. The new simulated process has the same priority as the parent simulated process. The program counter userInteger of the new simulated process is set to the instruction immediately after the F instruction, while the program counter userInteger of the of the parent simulated process is set to n instructions after the next instruction (instruction immediately after F. The new simulated process is created in the ready state.
+Finally, the R instruction results in replacing the process image of the currently running simulated process. Its program array is overwritten by the code in file filename, program counter userInteger is set to 0, and integer userInteger is undefined. Note that all these changes are made only in the Cpu data structure. Process id, parent process id, start time, CPU time used so far, state, and priority remain unchanged.
 
 ## Process manager: Scheduling ##
 
