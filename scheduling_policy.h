@@ -32,7 +32,10 @@ void Scheduleling_Algorithm(int Priority,int pcbindex );
 void insert_into_ready_que(std::deque<int>& readyState);
 void schedule(int RunningState,int currentprocesspcbindex , std::deque<int>& readyState, CPU &cpu ,PcbBlock PcbTable[]);
 void print();
-
+void lower_priority(int priority, int pcbindex,PcbBlock PcbTable[]);
+void raise_priority(int priority, int pcbindex,PcbBlock PcbTable[]);
+void schedule_block(int RunningState,int currentprocesspcbindex , deque<int>& readyState,deque<int>& blockedState ,CPU &cpu ,PcbBlock PcbTable[] );
+void schedule_unblock(int RunningState,int currentprocesspcbindex , deque<int>& readyState,deque<int>& blockedState ,CPU &cpu ,PcbBlock PcbTable[] );
 private:
 std::priority_queue<std::pair<int,int> , std::vector<std::pair<int,int> >, std::greater<std::pair<int,int> > >* Priorityarray;
 

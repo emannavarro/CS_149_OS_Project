@@ -7,6 +7,7 @@
 
 void context_switch_saving(int currentprocesspcbindex, CPU &cpu, PcbBlock PcbTable[]);
 void context_switch_Loading(int nextprocesspcbindex, CPU &cpu, PcbBlock PcbTable[]);
+void context_switch_saving_for_blocked_operation(int currentprocesspcbindex,CPU &cpu,PcbBlock PcbTable[] );
 
 
 #endif

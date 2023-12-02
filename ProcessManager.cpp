@@ -35,6 +35,7 @@ void schedule()
 
 
     schedulingPolicy.schedule(runningState[0], programIndexCounter, readyState, cpu, PcbTable);
+   
     /**
 
     // TODO: Implement
@@ -81,21 +82,22 @@ void schedule()
 
 // Implements the B op.
 void block()
-{
+{   
+    schedulingPolicy.schedule_block(runningState[0], programIndexCounter, readyState,blockedState ,cpu, PcbTable);
     // TODO: Implement
     // 1. Add the PCB index of the running process (stored in runningState) to the blocked queue.
-    int idx = runningState[0];
+    //int idx = runningState[0];
     // 2. Update the process's PCB entry
     // a. Change the PCB's state to blocked.
-    PcbTable[idx].state = BLOCKED;
+    //PcbTable[idx].state = BLOCKED;
     // b. Store the CPU program counter in the PCB's program
     //counter.
-    PcbTable[idx].programCounter = cpu.programCounter;
+    //PcbTable[idx].programCounter = cpu.programCounter;
     // c. Store the CPU's userInteger in the PCB's userInteger.
-    PcbTable[idx].userInteger = cpu.value;
+   // PcbTable[idx].userInteger = cpu.value;
     // 3. Update the running state to -1 (basically mark no process as running). Note that a new process will be chosen to run later (via the
     // Q command code calling the schedule() function).
-    runningState[0] = -1;
+    //runningState[0] = -1;
 }
 
 // Implements the E op.
@@ -232,19 +234,21 @@ void quantum()
 void unblock()
 {
     // 1. If the blocked queue contains any processes:
-    if(blockedState.empty()) {
-        cout << "There are no processes that are blocked." << endl;
-        return;
-    }
+    //if(blockedState.empty()) {
+    //    cout << "There are no processes that are blocked." << endl;
+    //    return;
+    //}
+    schedulingPolicy.schedule_unblock(runningState[0], programIndexCounter, readyState,blockedState ,cpu, PcbTable);
+     
     // a. Remove a process form the front of the blocked queue.
-    int idx = blockedState.front();
-    blockedState.pop_front();
+    //int idx = blockedState.front();
+    //blockedState.pop_front();
     // b. Add the process to the ready queue.
-    readyState.push_back(idx);
+    //readyState.push_back(idx);
     // c. Change the state of the process to ready (update its PCB entry).
-    PcbTable[idx].state = READY;
+   //PcbTable[idx].state = READY;
     // 2. Call the schedule() function to give an unblocked process a chance to run (if possible).
-    schedule();
+    //schedule();
 }
 // Implements the P command.
 void print()
