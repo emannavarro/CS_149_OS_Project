@@ -19,6 +19,7 @@ extern PcbBlock PcbTable[20];
 extern int globalTime;
 extern int programIndexCounter; //Keep track of which is the next available index
 extern int terminatedProcess;
+extern double avgTurnaroundTime;
 
 
 // Function declarations

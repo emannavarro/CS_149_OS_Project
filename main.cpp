@@ -25,6 +25,7 @@ CPU cpu;
 queue<int> readyState[4];
 deque<int> blockedState;
 int runningState; //?
+double avgTurnaroundTime;
 
 int main(int argc, char *argv[]){
     int pip[2];

@@ -34,7 +34,6 @@ void decrement(int value) {
 void schedule()
 {
     // TODO: Implement
-    //TODO: Implement Priority preempting in schedule
     // 1. Return if there is still a processing running
     cout << "Schedule is running, running state: " << runningState << endl;
     if(cpu.timeSlice == cpu.timeSliceUsed){
@@ -292,7 +291,58 @@ void unblock()
 void print()
 {
     cout << "In print" << endl;
-    cout << cpu.timeSliceUsed << endl;
+
+    cout << "Current time: " << globalTime << endl;
+
+    cout << "Running process:" << endl;
+    cout << "pid: " << PcbTable[runningState].childID << endl;
+    cout << "ppid: " << PcbTable[runningState].parentID << endl; 
+    cout << "priority: " << PcbTable[runningState].priority << endl;
+    cout << "value: " << PcbTable[runningState].userInteger << endl;
+    cout << "start time: " << PcbTable[runningState].startTime << endl;
+    cout << "CPU time used so far: " << PcbTable[runningState].processedTime << endl;
+
+    cout << "Blocked processes: " << endl;
+    cout << "Queue of blocked processes: " << endl;
+
+    for(int i = 0; i < blockedState.size(); i++) {
+        cout << "pid: " << PcbTable[blockedState[i]].childID << endl;
+        cout << "ppid: " << PcbTable[blockedState[i]].parentID << endl; 
+        cout << "priority: " << PcbTable[blockedState[i]].priority << endl;
+        cout << "value: " << PcbTable[blockedState[i]].userInteger << endl;
+        cout << "start time: " << PcbTable[blockedState[i]].startTime << endl;
+        cout << "CPU time used so far: " << PcbTable[blockedState[i]].processedTime << endl;
+        cout << "\n\n";
+    }
+
+    cout << "Processes ready to execute: " << endl;
+    /*
+        Waiting for the schedule() to be implemented before I can concretely implement this part
+    */
+    for(int i = 0; i < 4; i++) {
+        cout << "Queue of processes with priority " << i << ": " << endl;
+        queue<int> currentQueue = readyState[i];
+        while(!currentQueue.empty()) {
+            int x = currentQueue.front();
+            currentQueue.pop();
+            cout << "pid: " << PcbTable[x].childID << endl;
+            cout << "ppid: " << PcbTable[x].parentID << endl; 
+            cout << "priority: " << PcbTable[x].priority << endl;
+            cout << "value: " << PcbTable[x].userInteger << endl;
+            cout << "start time: " << PcbTable[x].startTime << endl;
+            cout << "CPU time used so far: " << PcbTable[x].processedTime << endl;
+            cout << "\n\n";
+        }
+    }
+}
+
+void avgTurnFunc(){
+    int totalTime = 0;
+    for(int h = 0; h <= programIndexCounter; h++){
+        totalTime += PcbTable[h].processedTime;
+    }
+    avgTurnaroundTime = totalTime / (double) programIndexCounter;
+    cout << "Average turnaround time: " << avgTurnaroundTime << endl;
 }
 
 // Function that implements the process manager.
@@ -349,7 +399,7 @@ int runProcessManager(int fileDescriptor)
                 break;
             case 'T':
                 cout << "Terminating. . ." << endl;
-                print();
+                avgTurnFunc();
                 break;
             default:
                 cout << "You entered an invalid character!" << endl;
