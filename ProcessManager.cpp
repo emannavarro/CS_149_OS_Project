@@ -14,6 +14,7 @@
 #include <unistd.h> // for pipe(), read(), write(), close(), fork(), and _exit()
 #include <vector> // for vector (used for PCB table
 #include <string>
+#include <queue>
 
 using namespace std;
 
@@ -32,29 +33,38 @@ void decrement(int value) {
 // Performs scheduling.
 void schedule()
 {
-
-
-    schedulingPolicy.schedule(runningState[0], programIndexCounter, readyState, cpu, PcbTable);
-   
-    /**
-
     // TODO: Implement
     // 1. Return if there is still a processing running
+    cout << "Schedule is running, running state: " << runningState[0] << endl;
     if(runningState[0] != -1) {
         cout << "There is still a process running" << endl;
         return;
     }
+    queue<int> currentQueue;
+    for(int i = 0; i < 4; i++){
+        if(!readyState[i].empty()){
+            currentQueue = readyState[i];
+            break;
+        }
+    }
     // (runningState != -1). There is no need to schedule if a process is already running (at least until iLab 3)
     // 2. Get a new process to run, if possible, from the ready queue.
-    if(readyState.empty()) {
+    if(currentQueue.empty()) {
         cout << "There are no processes in the ready queue" << endl;
         //----
         return;
     }
     // 3. If we were able to get a new process to run:
     // a. Remove the process from the ready queue.
-    int idx = readyState.front();
-    readyState.pop_back();
+    int idx = currentQueue.front();
+    queue<int> temp = currentQueue;
+    while(!temp.empty()){
+        int tempint = temp.front();
+        temp.pop();
+        cout << "Elements of current queue: " << tempint << endl;
+    }
+    cout << "Schedule idx: " << idx << endl;
+    currentQueue.pop();
 
     // b. Update the running state to the process's PCB index.
     runningState[0] = idx;
@@ -66,16 +76,21 @@ void schedule()
     // iii. Update the CPU structure with the PCB entry details
     // (program, program counter, userInteger, etc.)
     cpu.pProgram = &(PcbTable[idx].program);
+    for(Instruction i : PcbTable[idx].program){ 
+        cout << "i = " << i.op << endl;
+    }
     cpu.programCounter = PcbTable[idx].programCounter;
     cpu.value = PcbTable[idx].userInteger;
     // 4. If we were not able to get a new process to run, print an error message.
-    cout << "Unable to get a new process to run" << endl;
+    if(cpu.pProgram == NULL){
+        cout << "Unable to get a new process to run" << endl;
+    }
     // 5. Return
 
 
 
 
-    **/
+    
 
 
 }
@@ -83,21 +98,25 @@ void schedule()
 // Implements the B op.
 void block()
 {   
-    schedulingPolicy.schedule_block(runningState[0], programIndexCounter, readyState,blockedState ,cpu, PcbTable);
+    //schedulingPolicy.schedule_block(runningState[0], programIndexCounter, readyState,blockedState ,cpu, PcbTable);
     // TODO: Implement
     // 1. Add the PCB index of the running process (stored in runningState) to the blocked queue.
-    //int idx = runningState[0];
+    int idx = runningState[0];
     // 2. Update the process's PCB entry
     // a. Change the PCB's state to blocked.
-    //PcbTable[idx].state = BLOCKED;
+    PcbTable[idx].state = BLOCKED;
     // b. Store the CPU program counter in the PCB's program
     //counter.
-    //PcbTable[idx].programCounter = cpu.programCounter;
+    PcbTable[idx].programCounter = cpu.programCounter;
     // c. Store the CPU's userInteger in the PCB's userInteger.
-   // PcbTable[idx].userInteger = cpu.value;
+    PcbTable[idx].userInteger = cpu.value;
     // 3. Update the running state to -1 (basically mark no process as running). Note that a new process will be chosen to run later (via the
+    if(PcbTable[idx].priority > 0){
+        PcbTable[idx].priority--;
+    }
     // Q command code calling the schedule() function).
-    //runningState[0] = -1;
+    runningState[0] = -1;
+    blockedState.push_back(idx);
 }
 
 // Implements the E op.
@@ -124,7 +143,7 @@ void fork(int value)
     // 1. Get a free PCB index (pcbTable.size())
     int idx = ++programIndexCounter;
     // 2. Get the PCB entry for the current running process.
-    PcbBlock currProcess = PcbTable[idx-1];
+    PcbBlock currProcess = PcbTable[runningState[0]];
     PcbBlock childProcess;
     // 3. Ensure the passed-in userInteger is not out of bounds.
     if(programIndexCounter + value >= (sizeof(PcbTable) / sizeof(PcbBlock))) {
@@ -146,13 +165,13 @@ void fork(int value)
     childProcess.state = READY;
     // g. Set the start time to the current timestamp
     childProcess.startTime = globalTime;
+    childProcess.program = currProcess.program;
     // 5. Add the pcb index to the ready queue.
     //readyState.push_back(idx);  //gets updated in schedule function in scheduling_policy.cpp
+    readyState[currProcess.priority].push(idx);
     PcbTable[idx] = childProcess;
     // 6. Increment the cpu's program counter by the userInteger read in #3
     cpu.programCounter += value; //Not sure if I am doing this correct
-
-    schedulingPolicy.Scheduleling_Algorithm(childProcess.priority, idx);
 
 
 }
@@ -163,12 +182,12 @@ void replace(string &argument)
 /*
     Not sure if this implementation is correct
 */
-
+    cout << "Running Replace" << endl;
     // TODO: Implement
     // 1. Clear the CPU's program (cpu.pProgram->clear()).
     cpu.pProgram->clear();
     // 2. Use createProgram() to read in the filename specified by argument into the CPU (*cpu.pProgram)
-    if (!createProgram(argument, PcbTable[programIndexCounter].program)) {
+    if (!createProgram(argument, *cpu.pProgram)) {
         cout << "Error opening " << argument << endl;
         cpu.programCounter++;
         return;
@@ -176,8 +195,7 @@ void replace(string &argument)
     //  a. Consider what to do if createProgram fails. I printed an error, incremented the cpu program counter and then
     //  returned. Note that createProgram can fail if the file could not be opened or did not exist.
     // 3. Set the program counter to 0.
-    PcbTable[programIndexCounter].programCounter = 0;
-
+    cpu.programCounter = 0;
 }
 
 // Implements the Q command.
@@ -185,6 +203,8 @@ void quantum()
 {
     Instruction instruction;
     cout << "In quantum" << endl;
+    cout << "Current Program Counter: " << cpu.programCounter << endl;
+    cout << "Current Program Size: " << cpu.pProgram->size() << endl;
     if (runningState[0] == -1) {
         cout << "No processes are running" << endl;
         ++globalTime;
@@ -202,15 +222,17 @@ void quantum()
         case 'S':
             set(instruction.intArg);
             cout << "instruction S " << instruction.intArg << endl;
-            cout << "Current process userInteger is " << PcbTable[runningState[0]].userInteger << endl;
+            cout << "Current process userInteger is " << cpu.value << endl;
             break;
         case 'A':
             add(instruction.intArg);
             cout << "instruction A " << instruction.intArg << endl;
-            cout << "Current process userInteger is " << PcbTable[runningState[0]].userInteger << endl;
+            cout << "Current process userInteger is " << cpu.value << endl;
             break;
         case 'D':
             decrement(instruction.intArg);
+            cout << "instruction D " << instruction.intArg << endl;
+            cout << "Current process userInteger is " << cpu.value << endl;
             break;
         case 'B':
             block();
@@ -220,6 +242,7 @@ void quantum()
             break;
         case 'F':
             fork(instruction.intArg);
+            cout << "Fork successful" << endl;
             break;
         case 'R':
             replace(instruction.strArg);
@@ -234,21 +257,19 @@ void quantum()
 void unblock()
 {
     // 1. If the blocked queue contains any processes:
-    //if(blockedState.empty()) {
-    //    cout << "There are no processes that are blocked." << endl;
-    //    return;
-    //}
-    schedulingPolicy.schedule_unblock(runningState[0], programIndexCounter, readyState,blockedState ,cpu, PcbTable);
-     
+    if(blockedState.empty()) {
+        cout << "There are no processes that are blocked." << endl;
+        return;
+    }
     // a. Remove a process form the front of the blocked queue.
-    //int idx = blockedState.front();
-    //blockedState.pop_front();
+    int idx = blockedState.front();
+    blockedState.pop_front();
     // b. Add the process to the ready queue.
-    //readyState.push_back(idx);
+    readyState[PcbTable[idx].priority].push(idx);
     // c. Change the state of the process to ready (update its PCB entry).
-   //PcbTable[idx].state = READY;
+    PcbTable[idx].state = READY;
     // 2. Call the schedule() function to give an unblocked process a chance to run (if possible).
-    //schedule();
+    schedule();
 }
 // Implements the P command.
 void print()
@@ -271,7 +292,7 @@ int runProcessManager(int fileDescriptor)
     PcbTable[0].programCounter = 0;
     PcbTable[0].userInteger = 0;
     PcbTable[0].priority = 0;
-    PcbTable[0].state = State::RUNNING;
+    PcbTable[0].state = RUNNING;
     PcbTable[0].startTime = 0;
     PcbTable[0].processedTime = 0;
     runningState[0] = 0;
@@ -321,7 +342,7 @@ int runProcessManager(int fileDescriptor)
 
 
 // Trim from start (in place)
-static inline void ltrim(string &s) {
+/*static inline void ltrim(string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
         return !std::isspace(ch);
     }));
@@ -332,7 +353,7 @@ static inline void rtrim(string &s) {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
         return !std::isspace(ch);
     }).base(), s.end());
-}
+}*/
 
 string trim(const std::string &s) {
     size_t start = s.find_first_not_of(" \t\n\r\f\v");
@@ -370,7 +391,7 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
                     add(instruction.intArg);
                     break;
                 case 'D': // Integer argument.
-                    cout << "Read A from createProgram, adding userInteger " << instruction.intArg << endl;
+                    cout << "Read D from createProgram, adding userInteger " << instruction.intArg << endl;
                     decrement(instruction.intArg);
                     break;
                 case 'F': // Integer argument.
@@ -403,7 +424,7 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
             }
 
             pProgram.push_back(instruction);
-
+            cout << "Program size after push back: " << pProgram.size() << endl;
         }
 
         lineNum++;

@@ -4,17 +4,16 @@
 #define PROCESSMANAGER_H
 
 #include "Classes.h"
-#include "scheduling_policy.h"
 #include <string>
 #include <vector>
 #include <deque>
+#include <queue>
 
 using namespace std;
 
 extern CPU cpu;
-extern scheduling_policy schedulingPolicy;
 extern int runningState[1];
-extern deque<int> readyState;
+extern queue<int> readyState[4];
 extern deque<int> blockedState;
 extern PcbBlock PcbTable[20];
 extern int globalTime;

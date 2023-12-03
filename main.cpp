@@ -9,7 +9,6 @@
 
 #include "ProcessManager.h"
 #include "Classes.h"
-#include "scheduling_policy.h"
 
 using namespace std;
 
@@ -21,10 +20,9 @@ int globalTime;
 int terminatedProcess;
 int programIndexCounter;
 
-scheduling_policy schedulingPolicy;
 PcbBlock PcbTable[20];
 CPU cpu;
-deque<int> readyState;
+queue<int> readyState[4];
 deque<int> blockedState;
 int runningState[1]; //?
 
