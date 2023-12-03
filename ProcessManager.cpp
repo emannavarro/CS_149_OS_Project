@@ -36,12 +36,15 @@ void schedule()
     // TODO: Implement
     // 1. Return if there is still a processing running
     cout << "Schedule is running, running state: " << runningState << endl;
+    // if(PcbTable[0].priority > 3) {
+    //     cout << "*****PROCESS 0 PRIORITY == " << PcbTable[0].priority << endl;
+    // }
     if(cpu.timeSlice == cpu.timeSliceUsed){
         if(PcbTable[runningState].priority < 3){
            PcbTable[runningState].priority++; 
         }
         PcbTable[runningState].userInteger = cpu.value;
-        PcbTable[runningState].processedTime += cpu.timeSliceUsed;
+        // PcbTable[runningState].processedTime += cpu.timeSliceUsed;
         PcbTable[runningState].state = READY;
         PcbTable[runningState].programCounter = cpu.programCounter;
         readyState[PcbTable[runningState].priority].push(runningState);
@@ -85,7 +88,7 @@ void schedule()
     // i. Change the state to running.
     PcbTable[idx].state = RUNNING;
     // ii. Update the start time to the current timestamp.
-    PcbTable[idx].startTime = globalTime;
+    // PcbTable[idx].startTime = globalTime;
     // iii. Update the CPU structure with the PCB entry details
     // (program, program counter, userInteger, etc.)
     cpu.pProgram = &(PcbTable[idx].program);
@@ -101,19 +104,12 @@ void schedule()
         cout << "Unable to get a new process to run" << endl;
     }
     // 5. Return
-
-
-
-
-    
-
-
 }
 
 // Implements the B op.
 void block()
 {   
-    //schedulingPolicy.schedule_block(runningState, programIndexCounter, readyState,blockedState ,cpu, PcbTable);
+    cout << "Blocking Process: " << runningState << endl;
     // TODO: Implement
     // 1. Add the PCB index of the running process (stored in runningState) to the blocked queue.
     int idx = runningState;
@@ -137,14 +133,15 @@ void block()
 // Implements the E op.
 void end()
 {
-    // TODO: Implement
+    // TODO:Implement
+    // cout << "Terminating process " << runningState << endl;
     // 1. Get the PCB entry of the running process.
     int idx = runningState;
     // 2. Update the cumulative time difference (increment it by timestamp + 1 - start time of the process).
     /*
         Not sure what is the use of the cumulative time difference
     */
-    PcbTable[idx].processedTime = globalTime + 1 - PcbTable[idx].startTime;
+    // PcbTable[idx].processedTime = globalTime + 1 - PcbTable[idx].startTime;
     // 3. Increment the number of terminated processes.
     terminatedProcess++;
     // 4. Update the running state to -1 (basically mark no process as running). Note that a new process will be chosen to run later (via the Q command code calling the schedule function).
@@ -181,12 +178,13 @@ void fork(int value)
     // g. Set the start time to the current timestamp
     childProcess.startTime = globalTime;
     childProcess.program = currProcess.program;
+    childProcess.processedTime = 0;
     // 5. Add the pcb index to the ready queue.
     //readyState.push_back(idx);  //gets updated in schedule function in scheduling_policy.cpp
     readyState[currProcess.priority].push(idx);
     PcbTable[idx] = childProcess;
     // 6. Increment the cpu's program counter by the userInteger read in #3
-    cpu.programCounter += value; //Not sure if I am doing this correct
+    cpu.programCounter += value;
 
 
 }
@@ -284,56 +282,62 @@ void unblock()
     readyState[PcbTable[idx].priority].push(idx);
     // c. Change the state of the process to ready (update its PCB entry).
     PcbTable[idx].state = READY;
+    runningState = -1;
     // 2. Call the schedule() function to give an unblocked process a chance to run (if possible).
     schedule();
 }
 // Implements the P command.
 void print()
 {
-    cout << "In print" << endl;
-
     cout << "Current time: " << globalTime << endl;
 
     cout << "Running process:" << endl;
+    cout << "*****************************************\n" << endl;
+    cout << "-----------------------------------------" << endl;
     cout << "pid: " << PcbTable[runningState].childID << endl;
     cout << "ppid: " << PcbTable[runningState].parentID << endl; 
     cout << "priority: " << PcbTable[runningState].priority << endl;
     cout << "value: " << PcbTable[runningState].userInteger << endl;
     cout << "start time: " << PcbTable[runningState].startTime << endl;
     cout << "CPU time used so far: " << PcbTable[runningState].processedTime << endl;
-
+    cout << "-----------------------------------------" << endl;
+    cout << "\n*****************************************\n" << endl;
+    
     cout << "Blocked processes: " << endl;
     cout << "Queue of blocked processes: " << endl;
-
+    cout << "*****************************************\n" << endl;
     for(int i = 0; i < blockedState.size(); i++) {
+        cout << "-----------------------------------------" << endl;
         cout << "pid: " << PcbTable[blockedState[i]].childID << endl;
         cout << "ppid: " << PcbTable[blockedState[i]].parentID << endl; 
         cout << "priority: " << PcbTable[blockedState[i]].priority << endl;
         cout << "value: " << PcbTable[blockedState[i]].userInteger << endl;
         cout << "start time: " << PcbTable[blockedState[i]].startTime << endl;
         cout << "CPU time used so far: " << PcbTable[blockedState[i]].processedTime << endl;
-        cout << "\n\n";
+        cout << "-----------------------------------------" << endl;
     }
+    cout << "\n*****************************************\n" << endl;
 
-    cout << "Processes ready to execute: " << endl;
-    /*
-        Waiting for the schedule() to be implemented before I can concretely implement this part
-    */
+
+    cout << "Processes ready to execute: " << endl;    
+    cout << "*****************************************\n" << endl;
     for(int i = 0; i < 4; i++) {
         cout << "Queue of processes with priority " << i << ": " << endl;
         queue<int> currentQueue = readyState[i];
         while(!currentQueue.empty()) {
             int x = currentQueue.front();
             currentQueue.pop();
+            cout << "-----------------------------------------" << endl;
             cout << "pid: " << PcbTable[x].childID << endl;
             cout << "ppid: " << PcbTable[x].parentID << endl; 
             cout << "priority: " << PcbTable[x].priority << endl;
             cout << "value: " << PcbTable[x].userInteger << endl;
             cout << "start time: " << PcbTable[x].startTime << endl;
             cout << "CPU time used so far: " << PcbTable[x].processedTime << endl;
-            cout << "\n\n";
+            cout << "-----------------------------------------" << endl;
         }
     }
+    cout << "\n*****************************************\n" << endl;
 }
 
 void avgTurnFunc(){
@@ -345,10 +349,13 @@ void avgTurnFunc(){
     cout << "Average turnaround time: " << avgTurnaroundTime << endl;
 }
 
+void totalTerminatedProcess() {
+    cout << "Total terminated processes: " << terminatedProcess << endl;
+}
+
 // Function that implements the process manager.
 int runProcessManager(int fileDescriptor)
 {
-//vector<PcbBlock> pcbTable;
     // Attempt to create the init process.
     if (!createProgram("init", PcbTable[0].program)) {
         return EXIT_FAILURE;
@@ -372,7 +379,7 @@ int runProcessManager(int fileDescriptor)
     terminatedProcess = 0;
     globalTime = 0;
     programIndexCounter = 0;
-    double avgTurnaroundTime = 0;
+    avgTurnaroundTime = 0;
     // Loop until a 'T' is read, then terminate.
     char ch;
     do {
@@ -400,6 +407,7 @@ int runProcessManager(int fileDescriptor)
             case 'T':
                 cout << "Terminating. . ." << endl;
                 avgTurnFunc();
+                totalTerminatedProcess();
                 break;
             default:
                 cout << "You entered an invalid character!" << endl;
@@ -408,21 +416,6 @@ int runProcessManager(int fileDescriptor)
 
     return EXIT_SUCCESS;
 }
-
-
-// Trim from start (in place)
-/*static inline void ltrim(string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-        return !std::isspace(ch);
-    }));
-}
-
-// Trim from end (in place)
-static inline void rtrim(string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-        return !std::isspace(ch);
-    }).base(), s.end());
-}*/
 
 string trim(const std::string &s) {
     size_t start = s.find_first_not_of(" \t\n\r\f\v");
