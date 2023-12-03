@@ -34,16 +34,31 @@ void decrement(int value) {
 void schedule()
 {
     // TODO: Implement
+    //TODO: Implement Priority preempting in schedule
     // 1. Return if there is still a processing running
-    cout << "Schedule is running, running state: " << runningState[0] << endl;
-    if(runningState[0] != -1) {
+    cout << "Schedule is running, running state: " << runningState << endl;
+    if(cpu.timeSlice == cpu.timeSliceUsed){
+        if(PcbTable[runningState].priority < 3){
+           PcbTable[runningState].priority++; 
+        }
+        PcbTable[runningState].userInteger = cpu.value;
+        PcbTable[runningState].processedTime += cpu.timeSliceUsed;
+        PcbTable[runningState].state = READY;
+        PcbTable[runningState].programCounter = cpu.programCounter;
+        readyState[PcbTable[runningState].priority].push(runningState);
+        runningState = -1;
+    }
+    
+    if(runningState != -1) {
         cout << "There is still a process running" << endl;
         return;
     }
+
     queue<int> currentQueue;
     for(int i = 0; i < 4; i++){
         if(!readyState[i].empty()){
             currentQueue = readyState[i];
+            readyState[i].pop();
             break;
         }
     }
@@ -58,16 +73,15 @@ void schedule()
     // a. Remove the process from the ready queue.
     int idx = currentQueue.front();
     queue<int> temp = currentQueue;
-    while(!temp.empty()){
-        int tempint = temp.front();
-        temp.pop();
-        cout << "Elements of current queue: " << tempint << endl;
-    }
+    // while(!temp.empty()){
+    //     int tempint = temp.front();
+    //     temp.pop();
+    //     cout << "Elements of current queue: " << tempint << endl;
+    // }
     cout << "Schedule idx: " << idx << endl;
-    currentQueue.pop();
 
     // b. Update the running state to the process's PCB index.
-    runningState[0] = idx;
+    runningState = idx;
     // c. Update the process's PCB entry
     // i. Change the state to running.
     PcbTable[idx].state = RUNNING;
@@ -76,11 +90,13 @@ void schedule()
     // iii. Update the CPU structure with the PCB entry details
     // (program, program counter, userInteger, etc.)
     cpu.pProgram = &(PcbTable[idx].program);
-    for(Instruction i : PcbTable[idx].program){ 
-        cout << "i = " << i.op << endl;
-    }
+    // for(Instruction i : PcbTable[idx].program){ 
+    //     cout << "i = " << i.op << endl;
+    // }
     cpu.programCounter = PcbTable[idx].programCounter;
     cpu.value = PcbTable[idx].userInteger;
+    cpu.timeSlice = (int) pow(2, PcbTable[idx].priority);
+    cpu.timeSliceUsed = 0;
     // 4. If we were not able to get a new process to run, print an error message.
     if(cpu.pProgram == NULL){
         cout << "Unable to get a new process to run" << endl;
@@ -98,10 +114,10 @@ void schedule()
 // Implements the B op.
 void block()
 {   
-    //schedulingPolicy.schedule_block(runningState[0], programIndexCounter, readyState,blockedState ,cpu, PcbTable);
+    //schedulingPolicy.schedule_block(runningState, programIndexCounter, readyState,blockedState ,cpu, PcbTable);
     // TODO: Implement
     // 1. Add the PCB index of the running process (stored in runningState) to the blocked queue.
-    int idx = runningState[0];
+    int idx = runningState;
     // 2. Update the process's PCB entry
     // a. Change the PCB's state to blocked.
     PcbTable[idx].state = BLOCKED;
@@ -115,7 +131,7 @@ void block()
         PcbTable[idx].priority--;
     }
     // Q command code calling the schedule() function).
-    runningState[0] = -1;
+    runningState = -1;
     blockedState.push_back(idx);
 }
 
@@ -124,7 +140,7 @@ void end()
 {
     // TODO: Implement
     // 1. Get the PCB entry of the running process.
-    int idx = runningState[0];
+    int idx = runningState;
     // 2. Update the cumulative time difference (increment it by timestamp + 1 - start time of the process).
     /*
         Not sure what is the use of the cumulative time difference
@@ -133,7 +149,7 @@ void end()
     // 3. Increment the number of terminated processes.
     terminatedProcess++;
     // 4. Update the running state to -1 (basically mark no process as running). Note that a new process will be chosen to run later (via the Q command code calling the schedule function).
-    runningState[0] = -1;
+    runningState = -1;
 }
 
 // Implements the F op.
@@ -143,7 +159,7 @@ void fork(int value)
     // 1. Get a free PCB index (pcbTable.size())
     int idx = ++programIndexCounter;
     // 2. Get the PCB entry for the current running process.
-    PcbBlock currProcess = PcbTable[runningState[0]];
+    PcbBlock currProcess = PcbTable[runningState];
     PcbBlock childProcess;
     // 3. Ensure the passed-in userInteger is not out of bounds.
     if(programIndexCounter + value >= (sizeof(PcbTable) / sizeof(PcbBlock))) {
@@ -203,13 +219,14 @@ void quantum()
 {
     Instruction instruction;
     cout << "In quantum" << endl;
-    cout << "Current Program Counter: " << cpu.programCounter << endl;
-    cout << "Current Program Size: " << cpu.pProgram->size() << endl;
-    if (runningState[0] == -1) {
+    // cout << "Current Program Counter: " << cpu.programCounter << endl;
+    // cout << "Current Program Size: " << cpu.pProgram->size() << endl;
+    if (runningState == -1) {
         cout << "No processes are running" << endl;
         ++globalTime;
         return;
     }
+    cout << "Current Priority: " << PcbTable[runningState].priority << endl;
     if (cpu.programCounter < cpu.pProgram->size()) {
         instruction = (*cpu.pProgram)[cpu.programCounter];
         ++cpu.programCounter;
@@ -249,7 +266,7 @@ void quantum()
             break;
     }
     ++globalTime;
-    
+    cpu.timeSliceUsed++;
     //The PCBTable will need to be updated with the current PCBBlock object when context switching
     schedule();
 }
@@ -295,11 +312,13 @@ int runProcessManager(int fileDescriptor)
     PcbTable[0].state = RUNNING;
     PcbTable[0].startTime = 0;
     PcbTable[0].processedTime = 0;
-    runningState[0] = 0;
+    runningState = 0;
 
     cpu.pProgram = &(PcbTable[0].program);
     cpu.programCounter = PcbTable[0].programCounter;
     cpu.value = PcbTable[0].userInteger;
+    cpu.timeSlice = 1;
+    cpu.timeSliceUsed = 0;
     terminatedProcess = 0;
     globalTime = 0;
     programIndexCounter = 0;

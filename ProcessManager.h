@@ -12,7 +12,7 @@
 using namespace std;
 
 extern CPU cpu;
-extern int runningState[1];
+extern int runningState;
 extern queue<int> readyState[4];
 extern deque<int> blockedState;
 extern PcbBlock PcbTable[20];
