@@ -36,7 +36,7 @@ void schedule()
     // TODO: Implement
     // 1. Return if there is still a processing running
     cout << "Schedule is running, running state: " << runningState << endl;
-    if(cpu.timeSlice == cpu.timeSliceUsed){
+    if(cpu.timeSlice == cpu.timeSliceUsed && runningState != -1){
         if(PcbTable[runningState].priority < 3){
            PcbTable[runningState].priority++; 
         }
