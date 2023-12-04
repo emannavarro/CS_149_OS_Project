@@ -36,15 +36,12 @@ void schedule()
     // TODO: Implement
     // 1. Return if there is still a processing running
     cout << "Schedule is running, running state: " << runningState << endl;
-    // if(PcbTable[0].priority > 3) {
-    //     cout << "*****PROCESS 0 PRIORITY == " << PcbTable[0].priority << endl;
-    // }
     if(cpu.timeSlice == cpu.timeSliceUsed){
         if(PcbTable[runningState].priority < 3){
            PcbTable[runningState].priority++; 
         }
         PcbTable[runningState].userInteger = cpu.value;
-        // PcbTable[runningState].processedTime += cpu.timeSliceUsed;
+        PcbTable[runningState].processedTime++;
         PcbTable[runningState].state = READY;
         PcbTable[runningState].programCounter = cpu.programCounter;
         readyState[PcbTable[runningState].priority].push(runningState);
@@ -52,10 +49,11 @@ void schedule()
     }
     
     if(runningState != -1) {
+        PcbTable[runningState].processedTime++;
         cout << "There is still a process running" << endl;
         return;
     }
-
+    
     queue<int> currentQueue;
     for(int i = 0; i < 4; i++){
         if(!readyState[i].empty()){
@@ -75,11 +73,11 @@ void schedule()
     // a. Remove the process from the ready queue.
     int idx = currentQueue.front();
     queue<int> temp = currentQueue;
-    // while(!temp.empty()){
-    //     int tempint = temp.front();
-    //     temp.pop();
-    //     cout << "Elements of current queue: " << tempint << endl;
-    // }
+    while(!temp.empty()){
+        int tempint = temp.front();
+        temp.pop();
+        cout << "Elements of current queue: " << tempint << endl;
+    }
     cout << "Schedule idx: " << idx << endl;
 
     // b. Update the running state to the process's PCB index.
@@ -275,6 +273,12 @@ void unblock()
         cout << "There are no processes that are blocked." << endl;
         return;
     }
+    //Saves the current cpu value into the current process pcbblock
+    // PcbTable[runningState].programCounter = cpu.programCounter;
+    // PcbTable[runningState].userInteger = cpu.value;
+    // PcbTable[runningState].state = READY;
+
+
     // a. Remove a process form the front of the blocked queue.
     int idx = blockedState.front();
     blockedState.pop_front();
@@ -282,16 +286,18 @@ void unblock()
     readyState[PcbTable[idx].priority].push(idx);
     // c. Change the state of the process to ready (update its PCB entry).
     PcbTable[idx].state = READY;
-    runningState = -1;
+
+    // runningState = -1;
     // 2. Call the schedule() function to give an unblocked process a chance to run (if possible).
     schedule();
 }
+
 // Implements the P command.
 void print()
 {
     cout << "Current time: " << globalTime << endl;
 
-    cout << "Running process:" << endl;
+    cout << "\nRunning process:" << endl;
     cout << "*****************************************\n" << endl;
     cout << "-----------------------------------------" << endl;
     cout << "pid: " << PcbTable[runningState].childID << endl;
@@ -303,7 +309,7 @@ void print()
     cout << "-----------------------------------------" << endl;
     cout << "\n*****************************************\n" << endl;
     
-    cout << "Blocked processes: " << endl;
+    cout << "\nBlocked processes: " << endl;
     cout << "Queue of blocked processes: " << endl;
     cout << "*****************************************\n" << endl;
     for(int i = 0; i < blockedState.size(); i++) {
@@ -319,10 +325,11 @@ void print()
     cout << "\n*****************************************\n" << endl;
 
 
-    cout << "Processes ready to execute: " << endl;    
+    cout << "\nProcesses ready to execute: " << endl;    
     cout << "*****************************************\n" << endl;
     for(int i = 0; i < 4; i++) {
         cout << "Queue of processes with priority " << i << ": " << endl;
+        cout << "*****************************************\n" << endl;
         queue<int> currentQueue = readyState[i];
         while(!currentQueue.empty()) {
             int x = currentQueue.front();
@@ -336,6 +343,7 @@ void print()
             cout << "CPU time used so far: " << PcbTable[x].processedTime << endl;
             cout << "-----------------------------------------" << endl;
         }
+        cout << "*****************************************\n" << endl;
     }
     cout << "\n*****************************************\n" << endl;
 }
@@ -347,6 +355,15 @@ void avgTurnFunc(){
     }
     avgTurnaroundTime = totalTime / (double) programIndexCounter;
     cout << "Average turnaround time: " << avgTurnaroundTime << endl;
+}
+
+void update() {
+    cout << "processedTime: " << PcbTable[runningState].processedTime << endl;
+    cout << "timesliceused: " <<cpu.timeSliceUsed<< endl;
+    // PcbTable[runningState].processedTime += cpu.timeSliceUsed;
+    cout << "processedTime: " << PcbTable[runningState].processedTime << endl;
+    PcbTable[runningState].userInteger = cpu.value;
+
 }
 
 void totalTerminatedProcess() {
@@ -402,6 +419,7 @@ int runProcessManager(int fileDescriptor)
             case 'P':
                 //Implement the print()
                 cout << "You entered P" << endl;
+                update();
                 print();
                 break;
             case 'T':
