@@ -120,14 +120,10 @@ void block()
 void end()
 {
     // TODO:Implement
-    // cout << "Terminating process " << runningState << endl;
+    cout << "Terminating process " << runningState << endl;
     // 1. Get the PCB entry of the running process.
     int idx = runningState;
     // 2. Update the cumulative time difference (increment it by timestamp + 1 - start time of the process).
-    /*
-        Not sure what is the use of the cumulative time difference
-    */
-    // PcbTable[idx].processedTime = globalTime + 1 - PcbTable[idx].startTime;
     // 3. Increment the number of terminated processes.
     terminatedProcess++;
     // 4. Update the running state to -1 (basically mark no process as running). Note that a new process will be chosen to run later (via the Q command code calling the schedule function).
