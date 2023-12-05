@@ -35,7 +35,6 @@ void schedule()
 {
     // TODO: Implement
     // 1. Return if there is still a processing running
-    cout << "Schedule is running, running state: " << runningState << endl;
     if(cpu.timeSlice == cpu.timeSliceUsed && runningState != -1){
         if(PcbTable[runningState].priority < 3){
            PcbTable[runningState].priority++; 
@@ -50,7 +49,6 @@ void schedule()
     
     if(runningState != -1) {
         PcbTable[runningState].processedTime++;
-        cout << "There is still a process running" << endl;
         return;
     }
     
@@ -72,13 +70,6 @@ void schedule()
     // 3. If we were able to get a new process to run:
     // a. Remove the process from the ready queue.
     int idx = currentQueue.front();
-    queue<int> temp = currentQueue;
-    while(!temp.empty()){
-        int tempint = temp.front();
-        temp.pop();
-        cout << "Elements of current queue: " << tempint << endl;
-    }
-    cout << "Schedule idx: " << idx << endl;
 
     // b. Update the running state to the process's PCB index.
     runningState = idx;
@@ -90,9 +81,6 @@ void schedule()
     // iii. Update the CPU structure with the PCB entry details
     // (program, program counter, userInteger, etc.)
     cpu.pProgram = &(PcbTable[idx].program);
-    // for(Instruction i : PcbTable[idx].program){ 
-    //     cout << "i = " << i.op << endl;
-    // }
     cpu.programCounter = PcbTable[idx].programCounter;
     cpu.value = PcbTable[idx].userInteger;
     cpu.timeSlice = (int) pow(2, PcbTable[idx].priority);
@@ -214,18 +202,14 @@ void quantum()
 {
     Instruction instruction;
     cout << "In quantum" << endl;
-    // cout << "Current Program Counter: " << cpu.programCounter << endl;
-    // cout << "Current Program Size: " << cpu.pProgram->size() << endl;
     if (runningState == -1) {
         cout << "No processes are running" << endl;
         ++globalTime;
         return;
     }
-    cout << "Current Priority: " << PcbTable[runningState].priority << endl;
     if (cpu.programCounter < cpu.pProgram->size()) {
         instruction = (*cpu.pProgram)[cpu.programCounter];
         ++cpu.programCounter;
-        cout << "Incremented program counter by 1 and program counter is currently: " << cpu.programCounter << endl;
     } else {
         cout << "End of program reached without E op" << endl;
         instruction.op = 'E';
@@ -234,29 +218,28 @@ void quantum()
         case 'S':
             set(instruction.intArg);
             cout << "instruction S " << instruction.intArg << endl;
-            cout << "Current process userInteger is " << cpu.value << endl;
             break;
         case 'A':
             add(instruction.intArg);
             cout << "instruction A " << instruction.intArg << endl;
-            cout << "Current process userInteger is " << cpu.value << endl;
             break;
         case 'D':
             decrement(instruction.intArg);
             cout << "instruction D " << instruction.intArg << endl;
-            cout << "Current process userInteger is " << cpu.value << endl;
             break;
         case 'B':
+            cout << "instruction B " << endl;
             block();
             break;
         case 'E':
             end();
             break;
         case 'F':
+            cout << "instruction F " << instruction.intArg << endl;
             fork(instruction.intArg);
-            cout << "Fork successful" << endl;
             break;
         case 'R':
+            cout << "instruction R " << instruction.intArg << endl;
             replace(instruction.strArg);
             break;
     }
@@ -273,11 +256,6 @@ void unblock()
         cout << "There are no processes that are blocked." << endl;
         return;
     }
-    //Saves the current cpu value into the current process pcbblock
-    // PcbTable[runningState].programCounter = cpu.programCounter;
-    // PcbTable[runningState].userInteger = cpu.value;
-    // PcbTable[runningState].state = READY;
-
 
     // a. Remove a process form the front of the blocked queue.
     int idx = blockedState.front();
@@ -326,7 +304,7 @@ void print()
 
 
     cout << "\nProcesses ready to execute: " << endl;    
-    cout << "*****************************************\n" << endl;
+    cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n" << endl;
     for(int i = 0; i < 4; i++) {
         cout << "Queue of processes with priority " << i << ": " << endl;
         cout << "*****************************************\n" << endl;
@@ -345,7 +323,7 @@ void print()
         }
         cout << "*****************************************\n" << endl;
     }
-    cout << "\n*****************************************\n" << endl;
+    cout << "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n" << endl;
 }
 
 void avgTurnFunc(){
@@ -358,12 +336,7 @@ void avgTurnFunc(){
 }
 
 void update() {
-    cout << "processedTime: " << PcbTable[runningState].processedTime << endl;
-    cout << "timesliceused: " <<cpu.timeSliceUsed<< endl;
-    // PcbTable[runningState].processedTime += cpu.timeSliceUsed;
-    cout << "processedTime: " << PcbTable[runningState].processedTime << endl;
     PcbTable[runningState].userInteger = cpu.value;
-
 }
 
 void totalTerminatedProcess() {
@@ -413,12 +386,10 @@ int runProcessManager(int fileDescriptor)
                 break;
             case 'U':
                 //Implement the unblock()
-                cout << "You entered U" << endl;
                 unblock();
                 break;
             case 'P':
                 //Implement the print()
-                cout << "You entered P" << endl;
                 update();
                 print();
                 break;
@@ -464,14 +435,11 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
             switch (instruction.op) {
                 case 'S': // Integer argument.
                     set(instruction.intArg);
-                    cout << "Read S from createProgram, setting userInteger " << instruction.intArg << endl;
                     break;
                 case 'A': // Integer argument.
-                    cout << "Read A from createProgram, adding userInteger " << instruction.intArg << endl;
                     add(instruction.intArg);
                     break;
                 case 'D': // Integer argument.
-                    cout << "Read D from createProgram, adding userInteger " << instruction.intArg << endl;
                     decrement(instruction.intArg);
                     break;
                 case 'F': // Integer argument.
@@ -504,7 +472,6 @@ bool createProgram(const std::string &file_name, std::vector<Instruction> &pProg
             }
 
             pProgram.push_back(instruction);
-            cout << "Program size after push back: " << pProgram.size() << endl;
         }
 
         lineNum++;
