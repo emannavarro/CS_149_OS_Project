@@ -49,6 +49,7 @@ void schedule()
     
     if(runningState != -1) {
         PcbTable[runningState].processedTime++;
+        PcbTable[runningState].userInteger = cpu.value;
         return;
     }
     
@@ -60,11 +61,9 @@ void schedule()
             break;
         }
     }
-    // (runningState != -1). There is no need to schedule if a process is already running (at least until iLab 3)
     // 2. Get a new process to run, if possible, from the ready queue.
     if(currentQueue.empty()) {
         cout << "There are no processes in the ready queue" << endl;
-        //----
         return;
     }
     // 3. If we were able to get a new process to run:
@@ -260,7 +259,7 @@ void unblock()
     readyState[PcbTable[idx].priority].push(idx);
     // c. Change the state of the process to ready (update its PCB entry).
     PcbTable[idx].state = READY;
-
+    globalTime++;
     // runningState = -1;
     // 2. Call the schedule() function to give an unblocked process a chance to run (if possible).
     schedule();
@@ -268,7 +267,8 @@ void unblock()
 
 // Implements the P command.
 void print()
-{
+{  
+    cout << "------------------------------------------------------------------" << endl;
     cout << "Current time: " << globalTime << endl;
 
     cout << "\nRunning process:" << endl;
@@ -320,6 +320,7 @@ void print()
         cout << "*****************************************\n" << endl;
     }
     cout << "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n" << endl;
+    cout << "------------------------------------------------------------------" << endl;
 }
 
 void avgTurnFunc(){
@@ -329,10 +330,6 @@ void avgTurnFunc(){
     }
     avgTurnaroundTime = totalTime / (double) programIndexCounter;
     cout << "Average turnaround time: " << avgTurnaroundTime << endl;
-}
-
-void update() {
-    PcbTable[runningState].userInteger = cpu.value;
 }
 
 void totalTerminatedProcess() {
@@ -386,7 +383,6 @@ int runProcessManager(int fileDescriptor)
                 break;
             case 'P':
                 //Implement the print()
-                update();
                 print();
                 break;
             case 'T':
