@@ -49,6 +49,7 @@ void schedule()
     
     if(runningState != -1) {
         PcbTable[runningState].processedTime++;
+        PcbTable[runningState].userInteger = cpu.value;
         return;
     }
     
@@ -60,11 +61,9 @@ void schedule()
             break;
         }
     }
-    // (runningState != -1). There is no need to schedule if a process is already running (at least until iLab 3)
     // 2. Get a new process to run, if possible, from the ready queue.
     if(currentQueue.empty()) {
         cout << "There are no processes in the ready queue" << endl;
-        //----
         return;
     }
     // 3. If we were able to get a new process to run:
@@ -120,14 +119,10 @@ void block()
 void end()
 {
     // TODO:Implement
-    // cout << "Terminating process " << runningState << endl;
+    cout << "Terminating process " << runningState << endl;
     // 1. Get the PCB entry of the running process.
     int idx = runningState;
     // 2. Update the cumulative time difference (increment it by timestamp + 1 - start time of the process).
-    /*
-        Not sure what is the use of the cumulative time difference
-    */
-    // PcbTable[idx].processedTime = globalTime + 1 - PcbTable[idx].startTime;
     // 3. Increment the number of terminated processes.
     terminatedProcess++;
     // 4. Update the running state to -1 (basically mark no process as running). Note that a new process will be chosen to run later (via the Q command code calling the schedule function).
@@ -264,7 +259,7 @@ void unblock()
     readyState[PcbTable[idx].priority].push(idx);
     // c. Change the state of the process to ready (update its PCB entry).
     PcbTable[idx].state = READY;
-
+    globalTime++;
     // runningState = -1;
     // 2. Call the schedule() function to give an unblocked process a chance to run (if possible).
     schedule();
@@ -272,7 +267,8 @@ void unblock()
 
 // Implements the P command.
 void print()
-{
+{  
+    cout << "------------------------------------------------------------------" << endl;
     cout << "Current time: " << globalTime << endl;
 
     cout << "\nRunning process:" << endl;
@@ -324,6 +320,7 @@ void print()
         cout << "*****************************************\n" << endl;
     }
     cout << "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n" << endl;
+    cout << "------------------------------------------------------------------" << endl;
 }
 
 void avgTurnFunc(){
@@ -333,10 +330,6 @@ void avgTurnFunc(){
     }
     avgTurnaroundTime = totalTime / (double) programIndexCounter;
     cout << "Average turnaround time: " << avgTurnaroundTime << endl;
-}
-
-void update() {
-    PcbTable[runningState].userInteger = cpu.value;
 }
 
 void totalTerminatedProcess() {
@@ -390,7 +383,6 @@ int runProcessManager(int fileDescriptor)
                 break;
             case 'P':
                 //Implement the print()
-                update();
                 print();
                 break;
             case 'T':
